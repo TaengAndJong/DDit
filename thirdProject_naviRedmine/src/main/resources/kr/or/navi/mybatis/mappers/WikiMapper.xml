@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.wiki.dao.WikiDAO">
+	<sql id="searchFrag">
+		<if
+			test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			and
+			<choose>
+				<when test="simpleCondition.searchType eq 'title'">
+					INSTR(WIKI_TITLE, #{simpleCondition.searchWord}) > 0
+				</when>
+				<when test="simpleCondition.searchType eq 'name'">
+					INSTR(PROJECT.PRO_ID, #{simpleCondition.searchWord}) > 0
+				</when>
+				<otherwise>
+					INSTR(WIKI_TITLE, #{simpleCondition.searchWord}) > 0
+					OR
+					INSTR(PROJECT.PRO_ID, #{simpleCondition.searchWord}) > 0
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+
+	<select id="selectWikiList" resultType="WikiVO" parameterType="PaginationInfo">
+		SELECT B.*
+		FROM(
+		SELECT ROWNUM RNUM, A.*
+		FROM(
+		SELECT
+		wiki_id
+		, project.pro_id
+		, project.pro_name
+		, EMP.EMP_NAME
+		, project.PRO_REG_DT
+		, project.PRO_DDLINE_Ex
+		, wiki_title
+		, wiki_reg_dt
+		, wiki_mod_dt
+		, wiki_del_dt
+		, common.cm_name
+		, common.cm_id
+		FROM
+		wiki
+		JOIN
+		PROJECT ON(wiki.pro_id = project.pro_id)
+		JOIN
+		TEAM ON(project.pro_id=team.pro_id)
+		JOIN
+		EMP ON(team.emp_id=emp.emp_id)
+		JOIN common on (project.pro_st_id = common.cm_id)
+
+		WHERE
+		team.role_id = 'ROLE_PL'
+		AND PROJECT.PRO_DEL_YN IS NULL
+		AND WIKI_DEL_DT IS NULL
+		<include refid="searchFrag" />
+		ORDER by WIKI_REG_DT desc
+		) A
+		) B
+		<where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="totalRecord" parameterType="PaginationInfo">
+		select COUNT(*)FROM
+		(
+		SELECT
+		wiki_id
+		, project.pro_id
+		, project.PRO_NAME
+		, EMP.EMP_NAME
+		, project.PRO_REG_DT
+		, project.PRO_DDLINE_Ex
+		, project.PRO_ST_ID
+		, wiki_title
+		, wiki_cn
+		, wiki_reg_dt
+		, wiki_mod_dt
+		, wiki_del_dt
+		, common.cm_name
+		, common.cm_id
+		FROM
+		wiki
+		JOIN
+		PROJECT ON(wiki.pro_id = project.pro_id)
+		JOIN
+		TEAM ON(project.pro_id=team.pro_id)
+		JOIN
+		EMP ON(team.emp_id=emp.emp_id)
+		JOIN common on (project.pro_st_id = common.cm_id)
+
+		WHERE
+		team.role_id = 'ROLE_PL'
+		AND PROJECT.PRO_DEL_YN IS NULL
+		AND WIKI_DEL_DT IS NULL
+		<include refid="searchFrag" />
+		ORDER by WIKI_REG_DT desc
+		) A
+	</select>
+
+	<select id="selectWiki" resultMap="wikiMap">
+		SELECT
+		wiki_id
+		, project.pro_id
+		, project.PRO_NAME
+		, EMP.EMP_NAME
+		, project.PRO_REG_DT
+		, project.PRO_DDLINE_EX
+		, project.PRO_ST_ID
+		, wiki_title
+		, wiki_cn
+		, wiki_reg_dt
+		, wiki_mod_dt
+		, wiki_del_dt
+		, common.cm_name
+		, common.cm_id
+		FROM
+		wiki
+		JOIN
+		PROJECT ON(wiki.pro_id = project.pro_id)
+		JOIN
+		TEAM ON(project.pro_id=team.pro_id)
+		JOIN
+		EMP ON(team.emp_id=emp.emp_id)
+		JOIN common on (project.pro_st_id = common.cm_id)
+
+		WHERE team.role_id = 'ROLE_PL'
+		AND PROJECT.PRO_DEL_YN IS NULL
+		AND WIKI_ID = #{wikiId}
+	</select>
+	<resultMap type="WikiVO" id="wikiMap" autoMapping="true">
+		<id column="WIKI_ID" property="wikiId" />
+		<result column="WIKI_CN" property="wikiCn" jdbcType="CLOB" />
+	</resultMap>
+
+	<update id="updateWiki" parameterType="WikiVO">
+		UPDATE
+		WIKI
+		SET
+		wiki_title = #{vo.wikiTitle}
+		, wiki_mod_dt = SYSTIMESTAMP
+		, wiki_cn = #{vo.wikiCn}
+		WHERE
+		WIKI_ID = #{vo.wikiId}
+
+	</update>
+
+	<select id="selectProWiki">
+		SELECT
+		wiki_id
+		, project.pro_id
+		, project.PRO_NAME
+		, EMP.EMP_NAME
+		, project.PRO_REG_DT
+		, project.PRO_DDLINE_EX
+		, project.PRO_ST_ID
+		, wiki_title
+		, wiki_cn
+		, wiki_reg_dt
+		, wiki_mod_dt
+		, wiki_del_dt
+		, common.cm_name
+		, common.cm_id
+		FROM
+		wiki
+		JOIN
+		PROJECT ON(wiki.pro_id = project.pro_id)
+		JOIN
+		TEAM ON(project.pro_id=team.pro_id)
+		JOIN
+		EMP ON(team.emp_id=emp.emp_id)
+		JOIN common on (project.pro_st_id =
+		common.cm_id)
+
+		WHERE team.role_id = 'ROLE_PL'
+		AND PROJECT.PRO_DEL_YN IS NULL
+		AND
+		PROJECT.PRO_ID = #{proId}
+	</select>
+	<insert id="insertWiki" parameterType="WikiVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="wikiId">
+			SELECT 
+				'W' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(wiki_Id), 2)
+				            ), 0) + 1, 5, '0')
+							FROM wiki
+		</selectKey>
+	INSERT INTO wiki (
+	    wiki_id
+	    , pro_id
+	    , wiki_title
+	    , wiki_cn
+	    , wiki_reg_dt
+	    , wiki_mod_dt
+	    , wiki_del_dt
+	) VALUES (
+	    #{wikiId}
+	  , #{proId}
+	  , #{wikiTitle}
+	  , #{wikiCn}
+	  , SYSTIMESTAMP
+	  , NULL
+	  , NULL
+	)
+	</insert>
+	
+	<insert id="insertFile" parameterType="WikiFileVO">
+		<selectKey order="BEFORE" resultType="String" keyProperty="wfId">
+			SELECT 
+				'W' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(wf_id), 2)
+				            ), 0) + 1, 5, '0')
+							FROM wiki_file
+	</selectKey>
+		INSERT INTO wiki_file (
+		    wf_id
+		    , wiki_id
+		    , wk_file_gb_id
+		    , wf_attch_file
+		    , wf_org_nm
+		    , wiki_file_size
+		    , wiki_uuid_name
+		) VALUES (
+		    #{wfId}
+		  , #{wikiId}
+		  , #{wkFileGbId}
+		  , NULL
+		  , #{wfOrgNm}
+		  , #{wikiFileSize}
+		  , #{wikiUuidName}
+		)
+	</insert>
+	<select id="selectWikiFileList" resultType="WikiFileVO">
+	SELECT
+	    wf_id
+	  , wiki_id
+	  , wk_file_gb_id
+	  , wf_attch_file
+	  , wf_org_nm
+	  , wiki_file_size
+	  , wiki_uuid_name
+	FROM
+	    wiki_file
+	WHERE
+	    wiki_id= #{wikiId}
+	</select>
+	<select id="selectWikiFile" resultType="WikiFileVO">
+	SELECT
+	    wf_id
+	  , wiki_id
+	  , wk_file_gb_id
+	  , wf_attch_file
+	  , wf_org_nm
+	  , wiki_file_size
+	  , wiki_uuid_name
+	FROM
+	    wiki_file
+	WHERE
+	    wf_id= #{wf_id}
+	</select>
+	<delete id="deleteWikiFile">
+		DELETE FROM wiki_file WHERE wf_id = #{wfId}
+	</delete>
+</mapper>

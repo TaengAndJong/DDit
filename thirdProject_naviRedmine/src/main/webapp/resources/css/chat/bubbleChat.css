@@ -1,0 +1,132 @@
+body, html {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+.container {
+	border: 1px solid black;
+    width: 100%;
+ 	height: 100%;
+    display: flex;
+    flex-direction: column;
+	box-shadow: 1px 3px 10px 0 rgba(0, 0, 0, 0.2);
+	box-sizing: border-box;
+}
+
+.middle, .bottom {
+	border: none;
+}
+
+.middle {
+	flex: 8;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	background-color: #E3E3FA;
+	padding: 15px;
+  	display: flex;
+  	flex-direction: column;
+  	align-items: flex-start;
+}
+
+.middle::-webkit-scrollbar {
+	width: 10px;
+}
+
+.middle::-webkit-scrollbar-thumb {
+	background-color: #6D62E0;
+}
+
+.middle::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.5)
+}
+
+.middle::-webkit-scrollbar-track {
+	display: none;
+}
+
+.middle::-webkit-scrollbar-button {
+	display: none;
+}
+
+.chat-name {
+	display: inline-block;
+	color: #424242;
+	font-size: 13px;
+	position: relative;
+	top: 3px;
+}
+
+.you {
+	align-self: flex-start;
+	background-color: white;
+	display: inline-block;
+	padding: 10px;
+	border-radius: 5px;
+	position: relative;
+	color: #424242;
+	margin-top: 3px;
+	top: 5px;
+}
+
+.you-time {
+	position: absolute;
+	right: -80px;
+	bottom: 1px;
+	font-size: 15px;
+}
+
+.me {
+  	align-self: flex-end;
+	background-color: #BCBCFF;
+	display: inline-block;
+	padding: 10px;
+	border-radius: 5px;
+	position: relative;
+	color: #424242;
+}
+
+.me-time {
+	position: absolute;
+	left: -80px;
+	bottom: 1px;
+	font-size: 15px;
+}
+
+.bottom {
+	flex: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch; 
+	position: relative;
+}
+
+.textarea {
+    flex: 8;
+    margin-right: 10px;
+	border: none;
+	width: 80%;
+	resize: none;
+	margin-top: 15px;
+	margin-left: 15px;
+	background: none;
+	outline: none;
+}
+
+.sendBtn {
+	background: #BCBCFF;
+	flex: 2;
+	padding: 5px;
+	outline: none;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-transition: .3s ease-in-out;
+	border: none;
+}
+
+.sendBtn:hover {
+	background-color: #6D62E0;
+	top: 15px;
+	right: 15px;
+	cursor: pointer;
+}

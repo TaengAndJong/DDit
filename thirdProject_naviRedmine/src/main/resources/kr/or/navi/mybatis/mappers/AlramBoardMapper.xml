@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.alarm.dao.AlramBoardMapper">
+
+<select id="selectBaordPost">
+				SELECT
+				    bp_id
+			    , EMP.emp_id
+				  , EMP.emp_name
+				  , bp_mod_id
+				  , bp_title
+				  , bp_cn
+				  , bp_reg_dt
+				  , bp_cnt
+				  , bp_mod_dt
+				  , brd_id
+				FROM
+				    board_post
+				JOIN
+				    EMP ON(board_post.emp_id = emp.emp_id)
+				WHERE BP_ID = #{bpId}
+</select>
+
+<select id="selectAdmin">
+	select * from emp where role_id = 'ROLE_ADMIN'
+</select>
+</mapper>

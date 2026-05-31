@@ -1,0 +1,3 @@
+@charset "UTF-8";
+.vacListBtn{border:none;margin:0 0 10px 0;padding: 0 5px;border-radius: 3px;overflow: hidden;}
+#vacRecomList .modal .card{max-height:100%}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.quick.trip.dao.VacDAO">
+
+
+	<select id="selectVacList" resultType="VacVO"
+		parameterType="PaginationInfo">
+		SELECT B.*
+		FROM(
+			SELECT ROWNUM RNUM, A.*
+			FROM(
+				SELECT
+					VAC_ID
+					,VAC_NAME
+					,VAC_IMG
+					,VAC_EX
+					,VIEW_CNT
+				FROM
+			VACATION_CG
+				ORDER BY
+					VAC_ID
+				) A
+			) B
+		<where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectRecomVacList" parameterType="map" resultType="VacVO">
+		SELECT
+			VACATION_CG.VAC_ID
+			,VACATION_CG.VAC_NAME
+			,VACATION_CG.VAC_IMG
+			,VACATION_CG.VAC_EX
+			,VACATION_RECOM.VAC_RANK
+		FROM
+			VACATION_CG JOIN VACATION_RECOM ON (VACATION_CG.VAC_ID = VACATION_RECOM.VAC_ID)
+		WHERE
+			VACATION_RECOM.AGE_ID = '${map.age}' and VACATION_RECOM.FM_ID = '${map.per}' and VACATION_RECOM.DEPT_ID = '${map.dept}'
+		ORDER BY
+			VACATION_RECOM.VAC_RANK
+	
+	</select>
+	
+	<insert id="insertVacView">
+		INSERT INTO
+			VAC_VIEW (
+				EMP_ID
+				,VAC_ID
+			) VALUES (
+				'${empId}'
+				,'${vacId}'
+			)
+	</insert>
+	
+	<select id="selectTotalRecord">
+		SELECT
+			count(*)
+		FROM
+			VACATION_CG
+		ORDER BY
+			VAC_ID
+	</select>
+
+	<update id="updateView">
+		UPDATE
+		    VACATION_CG
+		SET
+		  VIEW_CNT = VIEW_CNT + 1
+		WHERE
+		    VAC_ID = #{vacId}
+	</update>
+</mapper>

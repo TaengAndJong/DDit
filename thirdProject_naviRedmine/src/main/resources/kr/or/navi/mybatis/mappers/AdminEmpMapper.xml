@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.admin.emp.dao.AdminEmpDAO">
+	<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.postion)">
+					position.ps_id = #{detailCondition.postion} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.dept)">
+					dept.dept_id = #{detailCondition.dept} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.block)">
+					emp_limit_yn = 'Y' AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.notblock)">
+					emp_limit_yn = 'N' AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.pms)">
+					emp.emp_pass is not null AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.notpms)">
+					emp.emp_pass is null
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.word)">
+					(INSTR(emp_name, #{detailCondition.word}) > 0
+					OR
+					INSTR(emp_addr || emp_addr2, #{detailCondition.word}) > 0
+					OR
+					INSTR(emp_id, #{detailCondition.word}) > 0)
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+
+
+	<select id="selectEmpAllList" resultType="EmpVO">
+		SELECT * FROM
+		(
+			SELECT ROWNUM RNUM, A.* FROM
+			(
+				SELECT
+				emp_id
+					, dept.dept_id
+					, dept.dept_name
+					, position.ps_id
+					, position.ps_name
+					, role_id
+					, cn_id
+					, emp_img
+					, emp_image
+					, emp_name
+					, emp_age
+					, emp_gen
+					, emp_pass
+					, emp_rrno
+					, emp_phone
+					, emp_tel
+					, emp_zip
+					, emp_addr
+					, emp_mail
+					, emp_cmp_ymd
+					, emp_career
+					, emp_quit_dt
+					, emp_limit_yn
+					, emp_cert_cg
+					, emp_fm_id
+					, emp_bk_id
+					, emp_addr2
+				FROM
+					emp join dept on(emp.dept_id=dept.dept_id) join position
+					on(emp.ps_id=position.ps_id)
+				where
+		        	1=1 and emp_id != 'E00003'
+				<include refid="searchFrag" />
+			)A
+		)B
+		<where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectTotalRecord">
+		SELECT COUNT(*) FROM (
+			SELECT
+				emp_id
+				, dept.dept_id
+				, dept.dept_name
+				, position.ps_id
+				, position.ps_name
+				, role_id
+				, cn_id
+				, emp_img
+				, emp_name
+				, emp_age
+				, emp_gen
+				, emp_pass
+				, emp_rrno
+				, emp_phone
+				, emp_tel
+				, emp_zip
+				, emp_addr
+				, emp_mail
+				, emp_cmp_ymd
+				, emp_career
+				, emp_quit_dt
+				, emp_limit_yn
+				, emp_cert_cg
+				, emp_fm_id
+				, emp_bk_id
+				, emp_addr2
+			FROM
+				emp join dept on(emp.dept_id=dept.dept_id) join position
+				on(emp.ps_id=position.ps_id)
+			where
+       		 	1=1 and emp_id != 'E00003'
+		<include refid="searchFrag" />
+		) A
+	</select>
+	
+<!-- 	admin emp 컨테이너 sql 자료 -->
+<!-- 	전체사원 수량조회 -->
+	<select id="selectEmpTotalRecord">
+		SELECT COUNT(*) FROM (
+			SELECT
+				emp_id
+				, dept.dept_id
+				, dept.dept_name
+				, position.ps_id
+				, position.ps_name
+				, role_id
+				, cn_id
+				, emp_img
+				, emp_name
+				, emp_age
+				, emp_gen
+				, emp_pass
+				, emp_rrno
+				, emp_phone
+				, emp_tel
+				, emp_zip
+				, emp_addr
+				, emp_mail
+				, emp_cmp_ymd
+				, emp_career
+				, emp_quit_dt
+				, emp_limit_yn
+				, emp_cert_cg
+				, emp_fm_id
+				, emp_bk_id
+				, emp_addr2
+			FROM
+				emp join dept on(emp.dept_id=dept.dept_id) join position
+				on(emp.ps_id=position.ps_id)
+		) A
+	</select> 
+	
+	<select id="selectPmsTotalRecord">
+		SELECT COUNT(*) FROM (
+			SELECT
+				emp_id
+				, dept.dept_id
+				, dept.dept_name
+				, position.ps_id
+				, position.ps_name
+				, role_id
+				, cn_id
+				, emp_img
+				, emp_name
+				, emp_age
+				, emp_gen
+				, emp_pass
+				, emp_rrno
+				, emp_phone
+				, emp_tel
+				, emp_zip
+				, emp_addr
+				, emp_mail
+				, emp_cmp_ymd
+				, emp_career
+				, emp_quit_dt
+				, emp_limit_yn
+				, emp_cert_cg
+				, emp_fm_id
+				, emp_bk_id
+				, emp_addr2
+			FROM
+				emp join dept on(emp.dept_id=dept.dept_id) join position
+				on(emp.ps_id=position.ps_id)
+			WHERE 
+                emp_pass is not null
+		) A
+	</select>  
+	
+	<select id="selectPlTotalRecord">
+		SELECT COUNT(*) FROM (
+			SELECT
+				emp_id
+				, dept.dept_id
+				, dept.dept_name
+				, position.ps_id
+				, position.ps_name
+				, role_id
+				, cn_id
+				, emp_img
+				, emp_name
+				, emp_age
+				, emp_gen
+				, emp_pass
+				, emp_rrno
+				, emp_phone
+				, emp_tel
+				, emp_zip
+				, emp_addr
+				, emp_mail
+				, emp_cmp_ymd
+				, emp_career
+				, emp_quit_dt
+				, emp_limit_yn
+				, emp_cert_cg
+				, emp_fm_id
+				, emp_bk_id
+				, emp_addr2
+			FROM
+				emp join dept on(emp.dept_id=dept.dept_id) join position
+				on(emp.ps_id=position.ps_id)
+			WHERE 
+                role_id = 'ROLE_PRO_CREATE'
+		) A
+	</select>  
+	
+	<select id="selectBlockTotalRecord">
+		SELECT COUNT(*) FROM (
+			SELECT
+				emp_id
+				, dept.dept_id
+				, dept.dept_name
+				, position.ps_id
+				, position.ps_name
+				, role_id
+				, cn_id
+				, emp_img
+				, emp_name
+				, emp_age
+				, emp_gen
+				, emp_pass
+				, emp_rrno
+				, emp_phone
+				, emp_tel
+				, emp_zip
+				, emp_addr
+				, emp_mail
+				, emp_cmp_ymd
+				, emp_career
+				, emp_quit_dt
+				, emp_limit_yn
+				, emp_cert_cg
+				, emp_fm_id
+				, emp_bk_id
+				, emp_addr2
+			FROM
+				emp join dept on(emp.dept_id=dept.dept_id) join position
+				on(emp.ps_id=position.ps_id)
+			WHERE 
+                EMP_LIMIT_YN = 'Y'
+		) A
+	</select>  
+	
+	<select id="selectTeamCount" resultType="int">
+		select count(*) from (
+		SELECT
+		    pro_id
+		  , emp_id
+		  , role_id
+		  , team_yn
+		FROM
+		    team
+		where emp_id= #{empId}
+		and Role_id='ROLE_PL')
+	</select>
+	
+	<update id="updateRoleId">
+	UPDATE EMP SET ROLE_ID = #{roleId} WHERE EMP_ID= #{empId}
+	</update>
+	
+	<update id="inviteCheckedEmp">
+	UPDATE EMP SET EMP_PASS ='0000',ROLE_ID='ROLE_EMP' WHERE EMP_ID IN
+	<foreach collection="emps" item="emp" open="(" close=")" separator="," >
+	#{emp.empId}
+	</foreach>
+	</update>
+
+	
+	<delete id="deleteCheckedEMP">
+    UPDATE EMP SET EMP_LIMIT_YN ='Y' WHERE EMP_ID IN
+    <foreach collection="emps" item="emp" open="(" close=")" separator=",">
+        #{emp.empId}
+    </foreach>
+</delete>
+	
+	<delete id="restoreCheckedEMP">
+		UPDATE EMP SET EMP_LIMIT_YN ='N' WHERE EMP_ID IN
+		<foreach collection="emps" item="emp" open="(" close=")" separator=",">
+			#{emp.empId}
+		</foreach>
+	</delete>
+</mapper>

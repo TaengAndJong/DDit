@@ -1,0 +1,74 @@
+body {
+	background-color: #E3E3FA;S
+}
+
+.mainbox {
+	background-color: #E3E3FA;
+	margin: auto;
+	height: 600px;
+	width: 600px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.err {
+	color: #6D62E0;
+	font-size: 11rem;
+	position: absolute;
+	left: 20%;
+	top: 8%;
+}
+
+.far {
+	position: absolute;
+	left: 41%;
+	top: 16%;
+    width: 140px;
+    height: auto;
+}
+
+/* 이미지 크기 조절 */
+.far img {
+    max-width: 100%; /* 부모 요소에 맞게 이미지의 최대 너비를 지정합니다 */
+    height: auto; /* 높이를 자동으로 조절하여 비율을 유지합니다 */
+	animation: rotate_image 6s linear infinite;
+	transform-origin: 50% 50%;
+}
+.err2 {
+	color: #6D62E0;
+	font-size: 11rem;
+	position: absolute;
+	left: 68%;
+	top: 8%;
+}
+
+.msg {
+	text-align: center;
+	font-size: 1.6rem;
+	position: absolute;
+	left: 16%;
+	top: 45%;
+	width: 75%;
+}
+
+.page {
+	font-size: 3rem;
+}
+
+a {
+	text-decoration: none;
+	color: #6D62E0;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+
+@keyframes rotate_image { 
+	100% {
+		transform: rotate(360deg);
+	}
+}

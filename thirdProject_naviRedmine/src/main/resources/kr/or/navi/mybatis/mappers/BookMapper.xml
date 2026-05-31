@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.quick.book.dao.BookDAO">
+	<select id="selectbookList" resultType="BookVO">
+		SELECT BK_LIST_ID,
+		BK_URL, BK_TTL, BK_ATHR, BK_CN
+		FROM BOOK_LIST
+		ORDER BY BK_LIST_ID
+	</select>
+	<select id="selectRecombookList" resultType="BookVO">
+		SELECT
+		BOOK_LIST.BK_URL, BOOK_LIST.BK_TTL, BOOK_LIST.BK_ATHR
+		FROM BOOK_LIST
+		JOIN BOOK_RECOM ON (BOOK_LIST.BK_LIST_ID = BOOK_RECOM.BK_LIST_ID)
+		WHERE BOOK_RECOM.BK_ID = #{map.bk} AND BOOK_RECOM.AGE_ID = #{map.age}
+		AND BOOK_RECOM.CR_ID = #{map.cr}
+		ORDER BY BOOK_RECOM.BK_RANK
+	</select>
+	<insert id="insertBook">
+		INSERT INTO BOOK_NEW (
+		EMP_ID
+		, BK_LIST_ID
+		) VALUES (
+		#{empId}, #{bkListId}
+		)
+	</insert>
+
+	<select id="alreadyBook" resultType="Long"
+		parameterType="String">
+		SELECT BK_LIST_ID
+		FROM BOOK_NEW
+		WHERE EMP_ID = #{empId}
+	</select>
+
+	<select id="selectbookNameList" resultType="BookNameVO">
+		SELECT BK_ID, BK_NM FROM BOOK
+	</select>
+	
+	<select id="getBookNameByBkId" resultType="String" parameterType="String">
+    SELECT BK_NM
+    FROM BOOK
+    WHERE BK_ID = #{bkId}
+</select>
+
+</mapper>

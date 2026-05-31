@@ -1,0 +1,9 @@
+@charset "UTF-8";
+@import url("../../font/GmarketSans/GmarketSans.css");
+@import url("../../font/NotoSansKR/NotoSansKR.css"); 
+@import url("../../font/CaviarDreams/CaviarDreams.css");
+@import url("../common/common_icon.css");
+@import url("../common/common_table.css");
+@import url("../common/calendar.css");
+
+.modal-content.recom{transform: translate(1%, 30%);border-radius:9px;overflow:hidden}

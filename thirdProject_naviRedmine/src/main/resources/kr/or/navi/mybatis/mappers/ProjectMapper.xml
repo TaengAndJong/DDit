@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.project.dao.ProjectDAO">
+	<resultMap type="ProjectVO" id="projectMap" autoMapping="true">
+		<id property="proId" column="PRO_ID"/>
+		<collection property="teamList" ofType="TeamVO" autoMapping="true">
+			<id property="proId" column="PRO_ID"/>
+			<id property="empId" column="EMP_ID"/>
+		</collection>
+	</resultMap>
+
+	<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.projectState)">
+					 pro_st_id = #{detailCondition.projectState} AND 
+				</if>
+				<if test="detailCondition.ing !='ing'">
+				
+					<if test="@org.apache.commons.lang3.StringUtils@isBlank(detailCondition.ing)">
+						/** 이거실행 1 **/
+						PRO_DDLINE_DT IS NULL AND
+					</if>
+					<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.ing)">
+						/** 이거실행 2 **/
+						PRO_DDLINE_DT IS NOT NULL AND
+					</if>
+					
+				</if>
+				<if test="detailCondition.ing == 'ing'">
+					PRO_DDLINE_DT IS NULL AND
+				</if>
+				
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.project)">
+					(INSTR(project.PRO_ID, #{detailCondition.project}) > 0 
+					OR
+					INSTR(project.PRO_NAME, #{detailCondition.project}) > 0 
+					OR
+					INSTR(emp.EMP_NAME, #{detailCondition.project}) > 0 )
+				</if>
+			</if>
+		</trim>
+	</sql>
+	
+	<select id="selectList" resultMap="projectMap" parameterType="PaginationInfo">
+	 SELECT B.*
+		FROM(
+    SELECT ROWNUM RNUM, A.*
+			FROM(
+		 SELECT
+	      	project.pro_id,
+            wiki_id,
+           wiki_title,
+           wiki_cn
+           wiki_reg_dt,
+           wiki_mod_dt,
+           wiki_del_dt,
+		    pro_st_id,
+		    pro_name,
+		    pro_desc,
+		    pro_reg_dt,
+		    pro_ddline_ex,
+		    pro_ddline_dt,
+		    pro_ddline_yn,
+		    pro_del_yn,
+            team.emp_id,
+            team.role_id,
+            team.team_yn,
+		    emp.emp_name,
+            common.cm_name,
+            common.cm_id
+		FROM
+		    project left outer join team on (project.pro_id=team.pro_id) inner join emp on(team.emp_id=emp.emp_id) inner join common on (project.pro_st_id = common.cm_id) 
+            left outer join wiki on(project.pro_Id=wiki.pro_Id)
+        where team.role_id = 'ROLE_PL'
+        AND PRO_DEL_YN IS NULL
+		<include refid="searchFrag" />
+		ORDER by pro_reg_dt desc 
+		) A
+        ) B
+        <where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectProject" resultMap="projectMap">
+		 SELECT
+	      	project.pro_id,
+            wiki_id,
+           wiki_title,
+           wiki_cn
+           wiki_reg_dt,
+           wiki_mod_dt,
+           wiki_del_dt,
+		    pro_st_id,
+		    pro_name,
+		    pro_desc,
+		    pro_reg_dt,
+		    pro_ddline_ex,
+		    pro_ddline_dt,
+		    pro_ddline_yn,
+		    pro_del_yn,
+            team.emp_id,
+            team.role_id,
+            team.team_yn,
+		    emp.emp_name,
+            common.cm_name,
+            common.cm_id
+		FROM
+		    project inner join team on (project.pro_id=team.pro_id) inner join emp on(team.emp_id=emp.emp_id) inner join common on (project.pro_st_id = common.cm_id) 
+            left outer join wiki on(project.pro_Id=wiki.pro_Id)
+        where team.role_id = 'ROLE_PL'
+        AND PROJECT.PRO_ID = #{proId}
+        
+	</select>
+	
+	<select id="selectTotalRecord">
+		WITH PROJ AS (
+		 SELECT
+	      	project.pro_id,
+            wiki_id,
+           wiki_title,
+           wiki_cn
+           wiki_reg_dt,
+           wiki_mod_dt,
+           wiki_del_dt,
+		    pro_st_id,
+		    pro_name,
+		    pro_desc,
+		    pro_reg_dt,
+		    pro_ddline_ex,
+		    pro_ddline_dt,
+		    pro_ddline_yn,
+		    pro_del_yn,
+            team.emp_id,
+            team.role_id,
+            team.team_yn,
+		    emp.emp_name,
+            common.cm_name,
+            common.cm_id
+		FROM
+		    project inner join team on (project.pro_id=team.pro_id) inner join emp on(team.emp_id=emp.emp_id) inner join common on (project.pro_st_id = common.cm_id) 
+            left outer join wiki on(project.pro_Id=wiki.pro_Id)
+        where team.role_id = 'ROLE_PL'
+        AND PRO_DEL_YN IS NULL
+		<include refid="searchFrag" />
+		)
+        SELECT COUNT(*) FROM PROJ
+	</select>
+	
+	<update id="updateProject" parameterType="ProjectVO">
+		UPDATE 
+			project
+		SET
+		    pro_st_id = #{project.proStId}
+		   , pro_name = #{project.proName}
+		   , pro_desc = #{project.proDesc}
+		    ,pro_reg_dt = #{project.proRegDt}
+		    ,pro_ddline_ex = #{project.proDdlineEx}
+		WHERE
+	        pro_id = #{project.proId}
+	</update>
+	
+	<delete id="deleteProject">
+		update project set PRO_DEL_YN = 'Y' WHERE pro_id = #{project.proId}
+	</delete>
+	<insert id="insertProject" parameterType="ProjectVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="proId">
+			select 
+		    'P'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(PRO_ID),5)),0)+1,5,'0') 
+		    FROM PROJECT
+		</selectKey>
+		INSERT INTO project (
+		    pro_id
+		    , pro_st_id
+		    , pro_name
+		    , pro_desc
+		    , pro_reg_dt
+		    , pro_ddline_ex
+		    , pro_ddline_dt
+		    , pro_ddline_yn
+		    , pro_del_yn
+		) VALUES (
+		    #{proId}
+		  , #{project.proStId}
+		  , #{project.proName}
+		  , #{project.proDesc}
+		  , SYSTIMESTAMP
+		  , #{project.proDdlineEx}
+		  , NULL
+		  , NULL
+		  , NULL
+		)
+	</insert>
+	<insert id="insertFileSave" parameterType="FileSaveVO">
+		INSERT INTO file_save (
+		    fs_id
+		    , pro_id
+		) VALUES (
+		   #{vo.fsId}
+		  ,  #{vo.proId}
+		)
+	</insert>
+	<select id="selectMaxProjectId">
+		select 
+		    'P'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(PRO_ID),5)),0)+1,5,'0') 
+		    FROM PROJECT
+	</select>
+	<select id="selectMaxFileSaveId">
+		select 
+		'F'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(FS_ID),5))+1,0),5,'0') 
+		FROM file_save
+	</select>
+	
+	<select id="selectEmpList" resultType="EmpVO">
+		SELECT
+		    emp_id
+		  , emp.dept_id
+		  , dept.dept_name
+		  , emp.ps_id
+		  , role_id
+		  , cn_id
+		  , emp_img
+		  , emp_name
+		  , emp_age
+		  , emp_gen
+		  , emp_pass
+		  , emp_rrno
+		  , emp_phone
+		  , emp_tel
+		  , emp_zip
+		  , emp_addr
+		  , emp_mail
+		  , emp_cmp_ymd
+		  , emp_career
+		  , emp_quit_dt
+		  , emp_limit_yn
+		  , emp_cert_cg
+		  , emp_fm_id
+		  , emp_bk_id
+		  , position.ps_name
+		FROM
+		    emp join dept on(emp.dept_Id=dept.dept_id)
+		    join position on(emp.ps_id=position.ps_id)
+		where emp.emp_pass is not null	
+	</select>
+	<insert id="insertTeam">
+	<selectKey order="BEFORE" resultType="string" keyProperty="proId">
+			select 
+		    'P'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(PRO_ID),5)),0),5,'0') 
+		    FROM PROJECT
+		</selectKey>
+	INSERT INTO team (
+	    pro_id
+	    , emp_id
+	    , role_id
+	    , team_yn
+	) VALUES (
+	    #{proId}
+	  , #{empId}
+	  , #{roleId}
+	  , 'Y'
+	)
+	</insert>
+	<insert id="insertUpTeam">
+		INSERT INTO team (
+		    pro_id
+		    , emp_id
+		    , role_id
+		    , team_yn
+		) VALUES (
+		    #{proId}
+		  , #{emp.empId}
+		  , #{emp.roleId}
+		  , 'Y'
+		)
+	</insert>
+		<sql id="searchFrag1">
+		<trim suffixOverrides="AND">
+			<if test="not paging.detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.postion)">
+					position.ps_id = #{paging.detailCondition.postion} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.dept)">
+					dept.dept_id = #{paging.detailCondition.dept} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.block)">
+					emp_limit_yn = 'Y' AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.notblock)">
+					emp_limit_yn = 'N' AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.pms)">
+					emp.emp_pass is not null AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.notpms)">
+					emp.emp_pass is null
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.word)">
+					(INSTR(emp_name, #{paging.detailCondition.word}) > 0
+					OR
+					INSTR(emp_addr || emp_addr2, #{paging.detailCondition.word}) > 0
+					OR
+					INSTR(emp_id, #{paging.detailCondition.word}) > 0)
+				</if>
+			</if>
+		</trim>
+	</sql>
+	<select id="selectOutEmpList" resultType="EmpVO">
+	SELECT * FROM
+		(
+	SELECT ROWNUM RNUM, A.* FROM
+	(
+		 SELECT 
+            emp_id
+		  , EMP.dept_id
+		  , DEPT.DEPT_NAME
+		  , POSITION.PS_ID
+		  , POSITION.PS_NAME
+		  , cn_id
+		  , emp_img
+		  , emp_name
+		  , emp_age
+		  , emp_gen
+		  , emp_pass
+		  , emp_rrno
+		  , emp_phone
+		  , emp_tel
+		  , emp_zip
+		  , emp_addr
+		  , emp_mail
+		  , emp_cmp_ymd
+		  , emp_career
+		  , emp_quit_dt
+		  , emp_limit_yn
+		  , emp_cert_cg
+		  , emp_fm_id
+		  , emp_bk_id
+		  , emp_addr2
+		  , EMP_IMAGE
+			FROM EMP  
+				JOIN DEPT ON(EMP.DEPT_ID = DEPT.DEPT_ID)
+				JOIN POSITION ON(EMP.PS_ID = POSITION.PS_ID)
+			WHERE EMP_PASS IS NOT NULL
+			AND NOT EXISTS (
+			    SELECT 1
+			    FROM TEAM3_202308F.TEAM t
+			    WHERE t.EMP_ID = emp.EMP_ID
+			    AND t.PRO_ID = #{proId}
+			    GROUP BY emp_id 
+    			HAVING COUNT(*) = 1
+			)
+		<include refid="searchFrag1" />
+		)A
+	)B
+	<where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+				<![CDATA[
+					RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	<select id="selectOutEmpTotalRecord">
+	SELECT COUNT(*) FROM
+	(
+		 SELECT 
+            emp_id
+		  , EMP.dept_id
+		  , DEPT.DEPT_NAME
+		  , POSITION.PS_ID
+		  , POSITION.PS_NAME
+		  , cn_id
+		  , emp_img
+		  , emp_name
+		  , emp_age
+		  , emp_gen
+		  , emp_pass
+		  , emp_rrno
+		  , emp_phone
+		  , emp_tel
+		  , emp_zip
+		  , emp_addr
+		  , emp_mail
+		  , emp_cmp_ymd
+		  , emp_career
+		  , emp_quit_dt
+		  , emp_limit_yn
+		  , emp_cert_cg
+		  , emp_fm_id
+		  , emp_bk_id
+		  , emp_addr2
+			FROM EMP  
+				JOIN DEPT ON(EMP.DEPT_ID = DEPT.DEPT_ID)
+				JOIN POSITION ON(EMP.PS_ID = POSITION.PS_ID)
+			WHERE EMP_PASS IS NOT NULL
+			AND NOT EXISTS (
+			    SELECT 1
+			    FROM TEAM3_202308F.TEAM t
+			    WHERE t.EMP_ID = emp.EMP_ID
+			    AND t.PRO_ID = #{proId}
+			    GROUP BY emp_id 
+    			HAVING COUNT(*) = 1
+			)
+			<include refid="searchFrag1" />
+	)
+	
+	</select>
+	
+	<update id="endProject">
+	UPDATE PROJECT SET PRO_DDLINE_YN ='Y' ,PRO_DDLINE_DT= SYSTIMESTAMP WHERE PRO_ID = #{proId}
+	</update>
+	
+
+	<select id="selectProjectAll" resultType="ProjectVO">
+		SELECT
+		    pro_id
+		  , pro_st_id
+		  , pro_name
+		  , pro_desc
+		  , pro_reg_dt
+		  , pro_ddline_ex
+		  , pro_ddline_dt
+		  , pro_ddline_yn
+		  , pro_del_yn
+		FROM
+		    project  where pro_ddline_yn is null
+	</select>
+</mapper>

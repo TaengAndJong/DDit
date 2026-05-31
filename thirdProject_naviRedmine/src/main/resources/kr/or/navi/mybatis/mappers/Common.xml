@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.common.dao.CommonDAO">
+<resultMap type="kr.or.navi.vo.CommonVO" id="commonMap" autoMapping="true">
+	<id property="cmId" column="CM_ID"/>
+	<result property="cmDesc" column="CM_DESC" jdbcType="CLOB"/>
+	
+</resultMap>
+<select id="selectProjectStateList" resultMap="commonMap">
+	SELECT
+	    cm_id,
+	    cm_name,
+	    cm_att1,
+	    cm_att2,
+	    cm_att3,
+	    cm_att4,
+	    cm_desc
+	FROM
+	    common
+	where cm_id like 'PS%'
+</select>
+<select id="selectIssueStateList" resultMap="commonMap">
+		SELECT
+	    cm_id,
+	    cm_name,
+	    cm_att1,
+	    cm_att2,
+	    cm_att3,
+	    cm_att4,
+	    cm_desc
+	FROM
+	    common
+	where cm_id like 'IG%'
+
+</select>
+<select id="selectIssueImportStateList" resultMap="commonMap">
+	SELECT
+	    cm_id,
+	    cm_name,
+	    cm_att1,
+	    cm_att2,
+	    cm_att3,
+	    cm_att4,
+	    cm_desc
+	FROM
+	    common
+	where cm_id like 'II%'
+</select>
+<select id="selectBoardTypeList" resultType="CommonVO">
+	SELECT
+	    common.cm_id,
+	    cm_name,
+	    cm_att1,
+	    cm_att2,
+	    cm_att3,
+	    cm_att4,
+	    cm_desc
+	FROM
+	    common
+	where cm_id like 'BN%'
+	
+</select>
+<select id="selectShareStateList" resultType="ShareStatVO">
+	SELECT
+		bp_shr_Yn,
+		SHR_NAME
+	FROM
+		SHARE_STAT
+</select>
+<select id="selectQnaStateList" resultType="QnaStateVO">
+	SELECT
+		bp_qna_yn,
+		qna_name
+	from
+		qna_state
+</select>
+<select id="selectOne" resultType="CommonVO">
+	SELECT
+	    cm_id,
+	    cm_name,
+	    cm_att1,
+	    cm_att2,
+	    cm_att3,
+	    cm_att4,
+	    cm_desc
+	FROM
+	    common
+	WHERE
+		cm_id = #{cmId}
+</select>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.projectdetail.dashboard.dao.DashBoardDAO">
+<resultMap type="TaskVO" id="taskFulMap" autoMapping="true">
+		<id property="taskId" column="TASK_ID" />
+		<association property="projectVO" autoMapping="true">
+			<id column="PRO_ID" property="proId" />
+		</association>
+		<association property="tsVO" autoMapping="true">
+			<id column="TS_ID" property="tsId" />
+		</association>
+	</resultMap>
+<select id="selectTaskList" resultMap="taskFulMap">
+SELECT
+  c.SOLAR_DATE
+   , task_id
+  , task_status.ts_id
+  , task_status.ts_time
+  , task_status.ts_name
+  , project.pro_id
+  , project.pro_name
+  , pro_st_id
+  , CM_NAME
+  , pro_desc
+  , pro_reg_dt
+  , pro_ddline_ex
+  , pro_ddline_dt
+  , pro_ddline_yn
+  , pro_del_yn
+  , task_man_id
+  , task_top_id
+  , tps_id
+  , task_reg_id
+  , task_title
+  , TO_CHAR(task_reg_dt, 'YYYYMMDD') AS task_reg_date
+   , task_reg_Dt
+  , task_ddline_dt
+  , task_mod_dt
+  , task_cn
+  , task_rqrd
+  , task_est_time
+  , task_comp_dt
+  , task_del_dt
+  , emp.emp_name
+  
+FROM calendar c
+LEFT OUTER JOIN task t ON c.solar_date = TO_CHAR(t.task_reg_dt, 'YYYYMMDD')
+    join project on (t.pro_id = project.pro_id)
+    join task_status on(t.ts_id=task_status.ts_id)
+    join COMMON ON(PROJECT.PRO_ST_ID=COMMON.CM_ID)
+    join emp on (t.task_man_id = emp.emp_id)
+WHERE project.pro_id=#{proId}
+
+</select>
+<select id="selectTeamList" resultType="TeamVO">
+ 	SELECT
+	    pro_id
+	  , emp_id
+	  , role_id
+	  , team_yn
+	FROM
+	    team
+	WHERE PRO_ID = #{proId}
+</select>
+</mapper>

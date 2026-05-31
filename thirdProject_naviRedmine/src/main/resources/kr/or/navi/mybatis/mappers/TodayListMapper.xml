@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.todaylist.dao.TodayListDAO">
+
+<!-- 일  -->
+
+<resultMap type="TaskVO" id="taskMap" autoMapping="true">
+		<id property="taskId" column="TASK_ID" />
+		<association property="taskProcessStatus" javaType="TaskProcessStatusVO" autoMapping="true">
+	    	<id property="tpsId" column="TPS_ID"/>
+	    </association>
+	    <association property="taskStatus" javaType="TaskStatusVO" autoMapping="true">
+	    	<id property="tsId" column="TS_ID"/>
+	    </association>
+	    <association property="projectVO" javaType="ProjectVO" autoMapping="true">
+	    	<id property="proId" column="PROD_ID"/>
+	    </association>
+	    <association property="empVO" javaType="EmpVO" autoMapping="true">
+	    	<id property="empId" column="EMP_ID"/>
+	    </association>
+</resultMap>
+
+<resultMap type="TodayListVO" id="todayListMap" autoMapping="true">
+		<id property="taskId" column="TASK_ID" />
+		<association property="taskProcessStatus" javaType="TaskProcessStatusVO" autoMapping="true">
+	    	<id property="tpsId" column="TPS_ID"/>
+	    </association>
+	    <association property="taskStatus" javaType="TaskStatusVO" autoMapping="true">
+	    	<id property="tsId" column="TS_ID"/>
+	    </association>
+	    <association property="project" javaType="ProjectVO" autoMapping="true">
+	    	<id property="proId" column="PROD_ID"/>
+	    </association>
+	    <association property="emp" javaType="EmpVO" autoMapping="true">
+	    	<id property="empId" column="EMP_ID"/>
+	    </association>
+</resultMap>
+
+
+<sql id="searchFrag">
+    <trim suffixOverrides="AND">
+        <if test="not paging.detailCondition.empty">
+            AND
+            <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.ts)">
+                TASK.ts_id = '${paging.detailCondition.ts}' AND 
+            </if>
+         	<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.tps)">
+                TASK.tps_id = '${paging.detailCondition.tps}' AND 
+            </if>
+          	<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.word)">
+                INSTR(TASK.task_title, '${paging.detailCondition.word}') > 0 
+                OR
+                INSTR(TASK.task_id, '${paging.detailCondition.word}') > 0 
+                OR
+                INSTR(PROJECT.pro_name, '${paging.detailCondition.word}') > 0 
+            </if> 
+        </if>
+    </trim>
+</sql>
+
+<select id="selectTaskAllList" resultMap="taskMap">
+		SELECT 
+			ROWNUM AS RNUM,
+		    TASK.task_id,
+		    TASK.ts_id,
+		    TASK.pro_id,
+		    TASK.task_man_id,
+		    TASK.task_top_id,
+		    TASK.tps_id,
+		    TASK.task_reg_id,
+		    TASK.task_title,
+		    TASK.task_reg_dt,
+		    TASK.task_ddline_dt,
+		    TASK.task_mod_dt,
+		    TASK.task_cn,
+		    TASK.task_rqrd,
+		    TASK.task_est_time,
+		    TASK.task_comp_dt,
+		    TASK.task_del_dt,
+		    PROJECT.PRO_NAME,
+		    TS.TS_NAME,
+		    TS.TS_TIME,
+		    TPS.TPS_NAME,
+		    TPS.TPS_ING,
+		    TPS.TPS_DESC,
+            EMP.EMP_NAME
+		FROM
+		    TASK 
+		JOIN 
+		    PROJECT ON TASK.PRO_ID = PROJECT.PRO_ID
+		JOIN 
+		    TASK_STATUS TS ON TASK.ts_id = TS.TS_ID
+		JOIN 
+		    TASK_PROCESS_STATUS TPS ON TASK.TPS_ID = TPS.TPS_ID
+		JOIN 
+			EMP ON TASK.task_man_id = EMP.EMP_ID
+		WHERE 
+		    TASK.TASK_MAN_ID= #{taskManId} AND TASK.tps_id != 'T00007' 
+		    AND TASK.TASK_DEL_DT IS NULL
+        AND TASK.task_id NOT IN(SELECT TASK_ID FROM TODAY_LIST WHERE EMP_ID=#{taskManId})
+</select>
+
+
+
+<!-- 이미추가된 일감 제거하는 조건 넣기  -->
+<select id="selectTaskList" resultMap="taskMap" parameterType="PaginationInfo">
+		SELECT 
+			ROWNUM AS RNUM,
+		    TASK.task_id,
+		    TASK.ts_id,
+		    TASK.pro_id,
+		    TASK.task_man_id,
+		    TASK.task_top_id,
+		    TASK.tps_id,
+		    TASK.task_reg_id,
+		    TASK.task_title,
+		    TASK.task_reg_dt,
+		    TASK.task_ddline_dt,
+		    TASK.task_mod_dt,
+		    TASK.task_cn,
+		    TASK.task_rqrd,
+		    TASK.task_est_time,
+		    TASK.task_comp_dt,
+		    TASK.task_del_dt,
+		    PROJECT.PRO_NAME,
+		    TS.TS_NAME,
+		    TS.TS_TIME,
+		    TPS.TPS_NAME,
+		    TPS.TPS_ING,
+		    TPS.TPS_DESC,
+            EMP.EMP_NAME
+		FROM
+		    TASK 
+		JOIN 
+		    PROJECT ON TASK.PRO_ID = PROJECT.PRO_ID
+		JOIN 
+		    TASK_STATUS TS ON TASK.ts_id = TS.TS_ID
+		JOIN 
+		    TASK_PROCESS_STATUS TPS ON TASK.TPS_ID = TPS.TPS_ID
+		JOIN 
+			EMP ON TASK.task_man_id = EMP.EMP_ID
+		WHERE 
+		    TASK.TASK_MAN_ID=#{taskManId} 
+		    AND TASK.tps_id != 'T00007' 
+		<include refid="searchFrag" /> 
+		
+</select>
+
+	
+<select id="selectTaskListTotalRecord">
+
+	WITH JTASK AS (
+	
+		 SELECT 
+			ROWNUM AS RNUM,
+		    TASK.task_id,
+		    TASK.ts_id,
+		    TASK.pro_id,
+		    TASK.task_man_id,
+		    TASK.task_top_id,
+		    TASK.tps_id,
+		    TASK.task_reg_id,
+		    TASK.task_title,
+		    TASK.task_reg_dt,
+		    TASK.task_ddline_dt,
+		    TASK.task_mod_dt,
+		    TASK.task_cn,
+		    TASK.task_rqrd,
+		    TASK.task_est_time,
+		    TASK.task_comp_dt,
+		    TASK.task_del_dt,
+		    PROJECT.PRO_NAME,
+		    TS.TS_NAME,
+		    TS.TS_TIME,
+		    TPS.TPS_NAME,
+		    TPS.TPS_ING,
+		    TPS.TPS_DESC,
+            EMP.EMP_NAME
+		FROM
+		    TASK 
+		JOIN 
+		    PROJECT ON TASK.PRO_ID = PROJECT.PRO_ID
+		JOIN 
+		    TASK_STATUS TS ON TASK.ts_id = TS.TS_ID
+		JOIN 
+		    TASK_PROCESS_STATUS TPS ON TASK.TPS_ID = TPS.TPS_ID
+		JOIN 
+			EMP ON TASK.task_man_id = EMP.EMP_ID
+		WHERE 
+		   TASK.TASK_MAN_ID=#{taskManId} 
+		   AND TASK.tps_id != 'T00007' 
+		  <include refid="searchFrag" />  
+	)
+
+	        
+ 	SELECT COUNT(*) FROM JTASK
+</select>
+
+<!-- 오늘의 일정 테이블에 데이터 추가하기  -->
+<insert id="insertTdList" parameterType="TodayListVO">
+<selectKey order="BEFORE" resultType="Integer" keyProperty="tlIdx">
+SELECT COALESCE(MAX(TL_IDX), 0) + 1 AS tlIdx
+FROM today_list
+WHERE TRUNC(TL_REG_DT) = TRUNC(SYSTIMESTAMP)
+AND EMP_ID= #{empId}
+</selectKey>    
+INSERT INTO TODAY_LIST 
+	(tl_reg_dt
+	, TL_IDX
+	, task_id
+	, emp_id)
+	VALUES (
+	SYSTIMESTAMP
+	, #{tlIdx}
+	, #{taskId}
+	, #{empId}
+	)
+</insert>
+<!-- 오늘의 일정 데이터 삭제하기  -->
+<delete id="deleteTdList" parameterType="TodayListVO">
+DELETE FROM TODAY_LIST 
+WHERE TASK_ID = #{taskId}
+and emp_id = #{empId}
+and TRUNC(TL_REG_DT) = TRUNC(SYSTIMESTAMP)
+</delete>
+
+
+
+<!-- 일감 업데이트 : 일감 taskDAO에서 가져와? -->
+
+<!-- 오늘의 일정 조회 테이블 TASK.TASK_ID=#{taskId} -->
+<select id="selectTodayList" resultMap="todayListMap">
+SELECT 
+A.*
+, TSK.TS_ID
+, TSK.PRO_ID
+, TSK.TASK_TITLE
+, TSK.TASK_MAN_ID
+, TSK.TASK_EST_TIME
+, TSK.TASK_RQRD
+, TSK.TASK_REG_DT
+, TSK.TASK_DDLINE_DT
+, TSK.TASK_COMP_DT
+FROM
+( SELECT TL_IDX,TL_REG_DT,TASK_ID,TODAY_LIST.EMP_ID 
+FROM TODAY_LIST
+    JOIN EMP E ON ( TODAY_LIST.EMP_ID = E.EMP_ID)
+)A  JOIN TASK TSK ON ( A.TASK_ID = TSK.TASK_ID)
+WHERE A.EMP_ID =#{empId} AND A.TASK_ID =  #{taskId}
+ORDER BY A.TL_IDX
+</select>
+<resultMap type="TodayListVO" id="todayListMap1" autoMapping="true">
+	<id column="tlIdx"/>
+	<id column="tlRegDt"/>
+	<association property="task" javaType="TaskVO" autoMapping="true">
+	    <id property="taskId" column="TASK_ID"/>
+	    <association property="taskManEmp" javaType="EmpVO" autoMapping="true">
+	    	<id property="empId" column="EMP_ID" />
+	    </association>
+	    <!-- project 변수의 매핑 -->
+	    <association property="projectVO" javaType="ProjectVO" autoMapping="true">
+	    	<id property="proId" column="PRO_ID"/>
+	    </association>
+	    <!-- project 변수의 매핑 -->
+	    <!-- taskStatusVO mapping : -->
+	    <association property="taskStatus" javaType="TaskStatusVO" autoMapping="true">
+			<id property="tsId" column="TS_ID"/>
+		</association>
+	    <!-- task status 변수의 매핑 -->
+	    <!-- taskProcessStatus -->
+	     <association property="taskProcessStatus" javaType="TaskProcessStatusVO" autoMapping="true">
+			<id property="tpsId" column="TPS_ID"/>
+		</association>
+	    <!-- taskProcessStatus -->
+	</association>
+</resultMap>
+<select id="selectTodayListAll" resultMap="todayListMap1">
+SELECT
+    tl_reg_dt
+  , tl_idx
+  , today_list.task_id
+  , today_list.emp_id
+  , task_status.ts_id
+  ,task_status.ts_name
+  ,task_status.ts_time
+  , pro_id
+  , task_man_id
+  , task_top_id
+  , task_process_status.tps_id
+  , task_process_status.tps_ing
+  , task_process_status.tps_name
+  , task_reg_id
+  , task_title
+  , task_reg_dt
+  , task_ddline_dt
+  , task_mod_dt
+  , task_cn
+  , task_rqrd
+  , task_est_time
+  , task_comp_dt
+  , task_del_dt
+FROM
+    today_list
+join task on(today_list.task_id=task.task_id)
+join emp on(today_list.emp_id=emp.emp_id)
+JOIN 
+    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+JOIN 
+    task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+WHERE
+	today_list.emp_id= #{taskManId}
+order by tl_idx
+</select>
+	<!-- 2) 오늘의 일정 예상시간, 소요시간, 작업상태 업데이트 쿼리 -->
+	<update id="updateTaskList" parameterType="TaskVO">
+		UPDATE TASK SET
+		tps_Id= #{tpsId} ,
+		task_Est_Time = #{taskEstTime},
+		TASK_MOD_DT = SYSTIMESTAMP,
+		TASK_RQRD = #{taskRqrd}
+		WHERE task_id= #{taskId}
+	</update>
+	<delete id="deleteTodayListOne" parameterType="TodayListVO">
+	DELETE FROM TODAY_LIST 
+	WHERE TASK_ID = #{taskId}
+	and emp_id = #{empId}
+	and TRUNC(TL_REG_DT) = TRUNC(SYSTIMESTAMP)
+	</delete>
+</mapper>

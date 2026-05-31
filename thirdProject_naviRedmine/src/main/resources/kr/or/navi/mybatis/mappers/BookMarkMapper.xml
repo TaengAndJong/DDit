@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.mypage.dao.MypageDAO">
+	<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not paging.detailCondition.empty">
+				AND
+				<if
+					test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.Mark)">
+					INSTR(CTGRY_NM, #{paging.detailCondition.Mark}) > 0
+					OR
+					INSTR(TITLE, #{paging.detailCondition.Mark}) > 0
+					OR
+					INSTR(REG_NM,
+					#{paging.detailCondition.Mark}) > 0
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+	<select id="bookmarkList" parameterType="string" resultType="BookmarkVO">
+		SELECT B.*
+		FROM (
+			SELECT ROWNUM RNUM, A.*
+			FROM (
+				SELECT
+					BM_ID,
+					CTGRY_ID,
+					CTGRY_NM,
+					CTGRY_URL,
+					TITLE_ID,
+					TITLE,
+					REG_ID,
+					REG_NM,
+					REG_DT,
+					DEL_DT
+				FROM (
+				SELECT
+					BI_ID AS BM_ID,
+					B.PRO_ID AS CTGRY_ID,
+					P.PRO_NAME AS CTGRY_NM,
+					NULL AS CTGRY_URL,
+					B.ISSUE_ID AS TITLE_ID,
+					I.ISSUE_TITLE AS TITLE,
+					I.ISSUE_REG_ID AS REG_ID,
+					E.EMP_NAME AS REG_NM,
+					BI_REG_DT AS REG_DT,
+					BI_DEL_DT AS DEL_DT
+				FROM
+					BOOKMARK_ISSUE B
+				JOIN
+					ISSUE I ON (B.ISSUE_ID = I.ISSUE_ID)
+				JOIN
+					PROJECT P ON (B.PRO_ID = P.PRO_ID)
+				JOIN
+					EMP E ON (I.ISSUE_REG_ID = E.EMP_ID)
+				WHERE
+					B.EMP_ID = #{empId}
+				AND B.BI_DEL_DT IS NULL
+				UNION ALL
+				SELECT
+					BB_ID AS BM_ID,
+					P.BRD_ID AS CTGRY_ID,
+					C.CM_NAME AS CTGRY_NM,
+					C.CM_ATT1 AS CTGRY_URL,
+					P.BP_ID AS TITLE_ID,
+					P.BP_TITLE AS TITLE,
+					P.EMP_ID AS REG_ID,
+					E.EMP_NAME AS REG_NM,
+					BB_REG_DT AS REG_DT,
+					BB_DEL_DT AS DEL_DT
+				FROM
+					BOOKMARK_BOARD B
+				JOIN
+					BOARD_POST P ON (B.BP_ID = P.BP_ID)
+				JOIN
+					COMMON C ON (P.BRD_ID = C.CM_ID)
+				JOIN
+					EMP E ON (P.EMP_ID = E.EMP_ID)
+				WHERE
+					B.EMP_ID = #{empId}
+				AND B.BB_DEL_DT IS NULL
+				)
+				ORDER BY REG_DT DESC
+			) A
+			<where>
+				<include refid="searchFrag" />
+			</where>
+		) B
+		<where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+				<![CDATA[
+				RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="selectTotalRecord">
+		SELECT COUNT(*) B FROM (
+			SELECT A.*
+			FROM (
+				SELECT
+					BM_ID,
+					CTGRY_ID,
+					CTGRY_NM,
+					CTGRY_URL,
+					TITLE_ID,
+					TITLE,
+					REG_ID,
+					REG_NM,
+					REG_DT,
+					DEL_DT
+				FROM (
+					SELECT
+						BI_ID AS BM_ID,
+						B.PRO_ID AS CTGRY_ID,
+						P.PRO_NAME AS CTGRY_NM,
+						NULL AS CTGRY_URL,
+						B.ISSUE_ID AS TITLE_ID,
+						I.ISSUE_TITLE AS TITLE,
+						I.ISSUE_REG_ID AS REG_ID,
+						E.EMP_NAME AS REG_NM,
+						BI_REG_DT AS REG_DT,
+						BI_DEL_DT AS DEL_DT
+					FROM
+						BOOKMARK_ISSUE B
+					JOIN
+						ISSUE I ON (B.ISSUE_ID = I.ISSUE_ID)
+					JOIN
+						PROJECT P ON (B.PRO_ID = P.PRO_ID)
+					JOIN
+						EMP E ON (I.ISSUE_REG_ID = E.EMP_ID)
+					WHERE
+						B.EMP_ID = #{empId}
+					AND B.BI_DEL_DT IS NULL
+					UNION ALL
+					SELECT
+						BB_ID AS BM_ID,
+						P.BRD_ID AS CTGRY_ID,
+						C.CM_NAME AS CTGRY_NM,
+						C.CM_ATT1 AS CTGRY_URL,
+						P.BP_ID AS TITLE_ID,
+						P.BP_TITLE AS TITLE,
+						P.EMP_ID AS REG_ID,
+						E.EMP_NAME AS REG_NM,
+						BB_REG_DT AS REG_DT,
+						BB_DEL_DT AS DEL_DT
+					FROM
+						BOOKMARK_BOARD B
+					JOIN
+						BOARD_POST P ON (B.BP_ID = P.BP_ID)
+					JOIN
+						COMMON C ON (P.BRD_ID = C.CM_ID)
+					JOIN
+						EMP E ON (P.EMP_ID = E.EMP_ID)
+					WHERE
+						B.EMP_ID = #{empId}
+					AND B.BB_DEL_DT IS NULL
+				)
+				ORDER BY REG_DT DESC
+			) A
+			<where>
+				<include refid="searchFrag" />
+			</where>
+			ORDER BY REG_DT DESC
+		) B
+	</select>
+
+	<insert id="insertBookmarkIssue" parameterType="BookmarkIssueVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="biId">
+			SELECT
+				'BI'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(BI_ID),4)),0)+1,4,'0')
+			FROM BOOKMARK_ISSUE
+		</selectKey>
+		INSERT INTO BOOKMARK_ISSUE (
+			BI_ID
+			, ISSUE_ID
+			, EMP_ID
+			, PRO_ID
+			, BI_REG_DT
+			, BI_DEL_DT
+		) VALUES (
+			#{biId}
+			, #{issueId}
+			, #{empId}
+			, #{proId}
+			, SYSTIMESTAMP
+			, NULL
+		)
+	</insert>
+
+	<select id="selectBookMarkIssueVO" resultType="BookmarkIssueVO">
+		SELECT
+			BI_ID
+			, ISSUE_ID
+			, EMP_ID
+			, PRO_ID
+			, BI_REG_DT
+			, BI_DEL_DT
+		FROM
+			BOOKMARK_ISSUE
+		WHERE
+			EMP_ID = #{empId}
+		AND
+			ISSUE_ID = #{issueId}
+	</select>
+
+	<update id="updateBookMarkIssue">
+		UPDATE BOOKMARK_ISSUE SET
+		BI_DEL_DT = ${text}
+		WHERE ISSUE_ID = #{issueId}
+		AND EMP_ID = #{empId}
+	</update>
+
+	<select id="selectMyBookMarkIssueList" resultType="BookmarkIssueVO">
+		SELECT
+			BI_ID
+			, ISSUE_ID
+			, EMP_ID
+			, PRO_ID
+			, BI_REG_DT
+			, BI_DEL_DT
+		FROM
+			BOOKMARK_ISSUE
+		WHERE
+			EMP_ID = #{empId}
+		AND
+			PRO_ID = #{proId}
+		AND
+			BI_DEL_DT IS NULL
+	</select>
+
+	<insert id="insertBoardBookmark" parameterType="BookmarkBoardVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="bbId">
+			SELECT
+				'BB'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(BB_ID),4)),0)+1,4,'0')
+			FROM BOOKMARK_BOARD
+		</selectKey>
+		INSERT INTO BOOKMARK_BOARD (
+			BB_ID
+			, BP_ID
+			, EMP_ID
+			, BB_REG_DT
+			, BB_DEL_DT
+		) VALUES (
+			#{bbId}
+			, #{bpId}
+			, #{empId}
+			, SYSTIMESTAMP
+			, NULL
+		)
+	</insert>
+
+	<select id="selectBookMarkBoardVO" resultType="BookmarkBoardVO">
+		SELECT
+			BB_ID
+			, BP_ID
+			, EMP_ID
+			, BB_REG_DT
+			, BB_DEL_DT
+		FROM
+			BOOKMARK_BOARD
+		WHERE
+			EMP_ID= #{empId}
+		AND
+			BP_ID = #{bpId}
+	</select>
+
+	<update id="updateBookMarkBoard">
+		UPDATE BOOKMARK_BOARD 
+		SET 
+		BB_DEL_DT = ${text} 
+		WHERE BP_ID = #{bpId} AND
+		EMP_ID = #{empId}
+	</update>
+
+	<select id="selectMyBookMarkBoardList" resultType="BookmarkBoardVO">
+		SELECT
+			BB_ID
+			, BP_ID
+			, EMP_ID
+			, BB_REG_DT
+			, BB_DEL_DT
+		FROM
+			BOOKMARK_BOARD
+		WHERE
+			EMP_ID = #{empId}
+		AND
+			BB_DEL_DT IS NULL
+	</select>
+</mapper>

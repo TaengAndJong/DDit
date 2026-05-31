@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.projectdetail.gantt.dao.TaskGanttDAO">
+<resultMap type="TaskVO" id="taskMap" autoMapping="true">
+	    <id property="taskId" column="TASK_ID"/>
+	    <association property="regEmp" javaType="EmpVO">
+	    	<id property="empId" column="REG_EMP_ID" />
+	    	<result property="deptId" column="REG_DEPT_ID"/>
+	    	<result property="psId" column="REG_PS_ID"/>
+	    	<result property="empImg" column="REG_EMP_IMG"/>
+	    	<result property="empName" column="REG_EMP_NAME"/>
+	    	<result property="empAge" column="REG_EMP_AGE"/>
+	    	<result property="empGen" column="REG_EMP_GEN"/>
+	    	<result property="empPass" column="REG_EMP_PASS"/>
+	    	<result property="empRrno" column="REG_EMP_RRNO"/>
+	    	<result property="empPhone" column="REG_EMP_PHONE"/>
+	    	<result property="empTel" column="REG_EMP_TEL"/>
+	    	<result property="empZip" column="REG_EMP_ZIP"/>
+	    	<result property="empMail" column="REG_EMP_MAIL"/>
+	    	<result property="empCmpYmd" column="REG_EMP_CMP_YMD"/>
+	    	<result property="empCareer" column="REG_EMP_CAREER"/>
+	    	<result property="empQuitDt" column="REG_EMP_QUIT_DT"/>
+	    	<result property="empLimitYn" column="REG_EMP_LMIT_YN"/>
+	    	<result property="empCertCg" column="REG_EMP_CERT_CG"/>
+	    	<result property="empFmId" column="REG_EMP_REG_FM_ID"/>
+	    	<result property="empBkId" column="REG_EMP_BK_ID"/>
+	    	<result property="empAddr2" column="REG_EMP_ADDR2"/>
+	    	<result property="deptName" column="REG_DEPT_NAME"/>
+	    	<result property="psName" column="REG_PS_NAME"/>
+	    </association>
+	    <association property="taskManEmp" javaType="EmpVO">
+	    	<id property="empId" column="EMP_ID" />
+	    	<result property="deptId" column="DEPT_ID"/>
+	    	<result property="psId" column="PS_ID"/>
+	    	<result property="empImg" column="EMP_IMG"/>
+	    	<result property="empName" column="EMP_NAME"/>
+	    	<result property="empAge" column="EMP_AGE"/>
+	    	<result property="empGen" column="EMP_GEN"/>
+	    	<result property="empPass" column="EMP_PASS"/>
+	    	<result property="empRrno" column="EMP_RRNO"/>
+	    	<result property="empPhone" column="EMP_PHONE"/>
+	    	<result property="empTel" column="EMP_TEL"/>
+	    	<result property="empZip" column="EMP_ZIP"/>
+	    	<result property="empMail" column="EMP_MAIL"/>
+	    	<result property="empCmpYmd" column="EMP_CMP_YMD"/>
+	    	<result property="empCareer" column="EMP_CAREER"/>
+	    	<result property="empQuitDt" column="EMP_QUIT_DT"/>
+	    	<result property="empLimitYn" column="EMP_LMIT_YN"/>
+	    	<result property="empCertCg" column="EMP_CERT_CG"/>
+	    	<result property="empFmId" column="EMP_REG_FM_ID"/>
+	    	<result property="empBkId" column="EMP_BK_ID"/>
+	    	<result property="empAddr2" column="EMP_ADDR2"/>
+	    	<result property="deptName" column="DEPT_NAME"/>
+	    	<result property="psName" column="PS_NAME"/>
+	    </association>
+	    <!-- project 변수의 매핑 -->
+	    <association property="projectVO" javaType="ProjectVO" autoMapping="true">
+	    	<id property="proId" column="PRO_ID"/>
+	    </association>
+	    <!-- project 변수의 매핑 -->
+	    <!-- taskStatusVO mapping : -->
+	    <association property="taskStatus" javaType="TaskStatusVO" autoMapping="true">
+			<id property="tsId" column="TS_ID"/>
+		</association>
+	    <!-- task status 변수의 매핑 -->
+	    <!-- taskProcessStatus -->
+	     <association property="taskProcessStatus" javaType="TaskProcessStatusVO" autoMapping="true">
+			<id property="tpsId" column="TPS_ID"/>
+		</association>
+	    <!-- taskProcessStatus -->
+	</resultMap>
+	<update id="updateDate" parameterType="TaskVO">
+		UPDATE 
+			TASK 
+		SET 
+			TASK_REG_DT = #{taskRegDt}
+			, TASK_COMP_DT = #{taskCompDt} 
+		WHERE 
+			TASK_ID = #{taskId}
+	</update>
+	<select id="selectTaskList" resultMap="taskMap">
+	SELECT B.*
+FROM (
+    SELECT ROWNUM RNUM, A.*
+    FROM (
+        SELECT
+            task_id,
+            TASK.ts_id,
+            task.pro_id,
+            task_man_id,
+            task_top_id,
+            TASK.tps_id,
+            task_reg_id,
+            task_title,
+            task_reg_dt,
+            task_ddline_dt,
+            task_mod_dt,
+            task_cn,
+            task_rqrd,
+            task_est_time,
+            task_comp_dt,
+            task_del_dt,
+            pro_st_id,
+            pro_name,
+            pro_desc,
+            pro_reg_dt,
+            pro_ddline_ex,
+            pro_ddline_dt,
+            pro_ddline_yn,
+            pro_del_yn,
+            MAN.emp_id,
+            MAN.dept_id,
+            MAN.ps_id,
+            MAN.emp_img,
+            MAN.emp_name,
+            MAN.emp_age,
+            MAN.emp_gen,
+            MAN.emp_pass,
+            MAN.emp_rrno,
+            MAN.emp_phone,
+            MAN.emp_tel,
+            MAN.emp_zip,
+            MAN.emp_addr,
+            MAN.emp_mail,
+            MAN.emp_cmp_ymd,
+            MAN.emp_career,
+            MAN.emp_quit_dt,
+            MAN.emp_limit_yn,
+            MAN.emp_cert_cg,
+            MAN.emp_fm_id,
+            MAN.emp_bk_id,
+            MAN.emp_addr2,
+            REG.emp_id AS REG_EMP_ID,
+            REG.dept_id AS REG_DEPT_ID,
+            REG.ps_id AS REG_PS_ID,
+            REG.emp_img AS REG_EMP_IMG,
+            REG.emp_name AS REG_EMP_NAME,
+            REG.emp_age AS REG_EMP_AGE,
+            REG.emp_gen AS REG_EMP_GEN,
+            REG.emp_pass AS REG_EMP_PASS,
+            REG.emp_rrno AS REG_EMP_RRNO,
+            REG.emp_phone AS REG_EMP_PHONE,
+            REG.emp_tel AS REG_EMP_TEL,
+            REG.emp_zip AS REG_EMP_ZIP,
+            REG.emp_addr AS REG_EMP_ADDR,
+            REG.emp_mail AS REG_EMP_MAIL,
+            REG.emp_cmp_ymd AS REG_EMP_CMP_YMD,
+            REG.emp_career AS REG_EMP_CAREER,
+            REG.emp_quit_dt AS REG_EMP_QUIT_DT,
+            REG.emp_limit_yn AS REG_EMP_LMIT_YN,
+            REG.emp_cert_cg AS REG_EMP_CERT_CG,
+            REG.emp_fm_id AS REG_EMP_REG_FM_ID,
+            REG.emp_bk_id AS REG_EMP_BK_ID,
+            REG.emp_addr2 AS REG_EMP_ADDR2,
+            ts_name,
+            ts_time,
+            MAN_DEPT.DEPT_NAME,
+            MAN_POSITION.PS_NAME,
+            REG_DEPT.DEPT_NAME AS REG_DEPT_NAME,
+            REG_POSITION.PS_NAME AS REG_PS_NAME,
+            tps_name,
+            tps_ing,
+            tps_desc,
+            LEVEL
+        FROM
+            task
+        JOIN
+            PROJECT ON (TASK.PRO_ID = PROJECT.PRO_ID)
+        JOIN
+            EMP MAN ON (TASK.TASK_MAN_ID = MAN.EMP_ID)
+        JOIN
+            task_status ON (TASK.TS_ID = TASK_STATUS.TS_ID)
+        JOIN
+            DEPT MAN_DEPT ON (MAN.DEPT_ID = MAN_DEPT.DEPT_ID)
+        JOIN
+            POSITION MAN_POSITION ON (MAN.PS_ID = MAN_POSITION.PS_ID)
+        JOIN
+            task_process_status ON (TASK.TPS_ID = task_process_status.TPS_ID)
+        JOIN
+            EMP REG ON (TASK.TASK_REG_ID = REG.EMP_ID)
+        JOIN
+            DEPT REG_DEPT ON (REG.DEPT_ID = REG_DEPT.DEPT_ID)
+        JOIN
+            POSITION REG_POSITION ON (REG.PS_ID = REG_POSITION.PS_ID)
+        WHERE
+            TASK.PRO_ID = #{proId}
+            AND task_del_dt IS NULL
+        START WITH task.task_top_id IS NULL
+        CONNECT BY PRIOR TASK.TASK_ID = task.task_top_id
+        ORDER SIBLINGS BY TASK.TASK_ID DESC, task_reg_dt -- 여기서 SIBLINGS 정렬 적용
+    ) A-- 여기서 전체 결과 정렬
+) B
+
+	</select>
+</mapper>

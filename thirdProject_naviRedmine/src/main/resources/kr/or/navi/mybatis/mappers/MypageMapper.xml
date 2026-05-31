@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.mypage.dao.MypageDAO">
+
+	<!-- myProject start -->
+	<resultMap type="ProjectVO" id="projectMap"
+		autoMapping="true">
+		<id property="proId" column="PRO_ID" />
+		<collection property="teamList" ofType="TeamVO"	autoMapping="true">
+			<id property="proId" column="PRO_ID" />
+			<id property="empId" column="EMP_ID" />
+		</collection>
+	</resultMap>
+
+	<sql id="searchFragProject">
+		<trim suffixOverrides="AND">
+			<!-- 전체검색 -->
+			<if test="not paging.detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.projectState)">
+					PRO_ST_ID = #{paging.detailCondition.projectState} AND
+				</if>
+				<!-- 마감된List -->
+				<if test="paging.detailCondition.state != null and paging.detailCondition.state == 'end'">
+					PRO_DDLINE_YN IS NOT NULL AND
+				</if>
+				<!-- 진행중List -->
+				<if test="paging.detailCondition.state != null and paging.detailCondition.state == 'ing'">
+					PRO_DDLINE_YN IS NULL AND
+				</if>
+				<!-- 검색field -->
+				<if	test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.project)">
+					INSTR(E.EMP_NAME, #{paging.detailCondition.project}) > 0
+					OR
+					INSTR(P.PRO_NAME, #{paging.detailCondition.project}) > 0
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+	<select id="myProjectList" resultMap="projectMap" parameterType="PaginationInfo">
+		SELECT B.*
+		FROM (
+			SELECT ROWNUM RNUM, A.*
+			FROM (
+				SELECT
+					P.PRO_ID,
+					P.PRO_NAME,
+					P.PRO_DESC,
+					P.PRO_REG_DT,
+					P.PRO_DDLINE_EX,
+					P.PRO_DDLINE_DT,
+					P.PRO_DDLINE_YN,
+					P.PRO_DEL_YN,
+					P.PRO_ST_ID,
+					E.EMP_NAME,
+					C.CM_NAME
+				FROM
+					PROJECT P
+				INNER JOIN
+					TEAM T ON (P.PRO_ID = T.PRO_ID)
+				INNER JOIN
+					EMP E ON (T.EMP_ID = E.EMP_ID)
+				INNER JOIN
+					COMMON C ON (P.PRO_ST_ID = C.CM_ID)
+				WHERE
+					T.ROLE_ID = 'ROLE_PL'
+				AND
+					P.PRO_ID IN (SELECT PRO_ID FROM TEAM WHERE EMP_ID = #{empId})
+				<include refid="searchFragProject" />
+				ORDER BY P.PRO_REG_DT DESC
+			) A
+		) B
+		<where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+                <![CDATA[
+                RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+                ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="selectTotalRecordProject">
+		WITH PROJ AS (
+			SELECT
+				P.PRO_ID,
+				P.PRO_NAME,
+				P.PRO_DESC,
+				P.PRO_REG_DT,
+				P.PRO_DDLINE_EX,
+				P.PRO_DDLINE_DT,
+				P.PRO_DDLINE_YN,
+				P.PRO_DEL_YN,
+				E.EMP_NAME,
+				C.CM_NAME
+			FROM
+				PROJECT P
+			INNER JOIN
+				TEAM T ON (P.PRO_ID = T.PRO_ID)
+			INNER JOIN
+				EMP E ON (T.EMP_ID = E.EMP_ID)
+			INNER JOIN
+				COMMON C ON (P.PRO_ST_ID = C.CM_ID)
+			WHERE
+				T.ROLE_ID = 'ROLE_PL' AND P.PRO_ID IN 
+			(SELECT PRO_ID FROM TEAM WHERE EMP_ID = #{empId})
+			<include refid="searchFragProject" />
+		)
+		SELECT COUNT(*) FROM PROJ
+	</select>
+
+	<!-- myProject end-->
+	
+	<!-- myIssue start-->
+	<resultMap type="IssueVO" id="issueMap" autoMapping="true">
+		<id column="ISSUE_ID" property="issueId" />
+		<result column="ISSUE_CN" property="issueCn" jdbcType="CLOB" />
+	</resultMap>
+
+	<sql id="searchFragIssue">
+		<trim suffixOverrides="AND">
+			<if test="not paging.detailCondition.empty">
+				AND
+				<!-- 삭제된List -->
+				<if test="paging.detailCondition.state != null and paging.detailCondition.state == 'end'">
+					ISSUE_DEL_DT IS NOT NULL AND
+				</if>
+				<!-- 진행중List -->
+				<if test="paging.detailCondition.state != null and paging.detailCondition.state == 'ing'">
+					ISSUE_DEL_DT IS NULL AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.imprtId)">
+					issue.imprt_id = #{paging.detailCondition.imprtId} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.issueId)">
+					issue.clsfc_id = #{paging.detailCondition.issueId} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.issueTitle)">
+					INSTR(issue.issue_title, #{paging.detailCondition.issueTitle}) > 0
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+	<select id="myIssueList" resultMap="issueMap" parameterType="PaginationInfo">
+		SELECT B.*
+		FROM (
+			SELECT ROWNUM RNUM, A.*
+			FROM (
+				SELECT
+					ISSUE_ID,
+					PRO_ID,
+					ISSUE_REG_ID,
+					EMP.EMP_NAME,
+					ISSUE.IMPRT_ID,
+					IMP.CM_NAME AS IMP_NAME,
+					CLSFC_ID,
+					STATES.CM_NAME AS STATE_NAME,
+					ISSUE_TITLE,
+					ISSUE_REG_DT,
+					ISSUE_DEL_DT
+				FROM
+					ISSUE
+				JOIN
+					COMMON IMP ON (ISSUE.IMPRT_ID = IMP.CM_ID)
+				JOIN
+					COMMON STATES ON (ISSUE.CLSFC_ID = STATES.CM_ID)
+				JOIN
+					EMP ON (ISSUE.ISSUE_REG_ID = EMP.EMP_ID)
+				WHERE
+					EMP.EMP_ID = #{empId}
+				<include refid="searchFragIssue" />
+				ORDER BY ISSUE.ISSUE_REG_DT DESC
+			) A
+		) B
+		<where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+                <![CDATA[
+                RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+                ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="selectTotalRecordIssue">
+		WITH ISSE AS (
+			SELECT
+				ISSUE_ID,
+				PRO_ID,
+				ISSUE_REG_ID,
+				EMP.EMP_NAME,
+				ISSUE.IMPRT_ID,
+				IMP.CM_NAME AS IMP_NAME,
+				CLSFC_ID,
+				STATES.CM_NAME AS STATE_NAME,
+				ISSUE_TITLE,
+				ISSUE_REG_DT,
+				ISSUE_DEL_DT
+			FROM
+				ISSUE
+			JOIN
+				COMMON IMP ON (ISSUE.IMPRT_ID = IMP.CM_ID)
+			JOIN
+				COMMON STATES ON (ISSUE.CLSFC_ID = STATES.CM_ID)
+			JOIN
+				EMP ON (ISSUE.ISSUE_REG_ID = EMP.EMP_ID)
+			WHERE
+				EMP.EMP_ID = #{empId}
+			<include refid="searchFragIssue" />
+		)
+		SELECT COUNT(*) FROM ISSE
+	</select>
+	<!-- myIssue end-->
+	<!-- myboard start-->
+	
+	<resultMap type="BoardPostVO" id="boardMap" autoMapping="true">
+		<id property="bpId" column="BP_ID"/>
+		<association property="emp" javaType="EmpVO" autoMapping="true"/>
+	</resultMap>
+	
+	<sql id="searchFragBoard">
+		<trim suffixOverrides="AND">
+		<!-- 전체List -->
+			<if test="not paging.detailCondition.empty">
+				AND
+				<!-- 삭제된List -->
+				<if test="paging.detailCondition.state != null and paging.detailCondition.state == 'end'">
+					B.BP_DEL_DT IS NOT NULL AND
+				</if>
+				<!-- 진행중List -->
+				<if test="paging.detailCondition.state != null and paging.detailCondition.state == 'ing'">
+					B.BP_DEL_DT IS NULL AND
+				</if>
+				<!-- 게시판ID -->
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.brdId)">
+					B.BRD_ID = #{paging.detailCondition.brdId} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.bpTitle)">
+					INSTR(B.BP_TITLE, #{paging.detailCondition.bpTitle}) > 0
+				</if>
+			</if>
+		</trim>
+	</sql>
+	
+	<select id="myBoardList"  resultMap="boardMap" parameterType="PaginationInfo">
+		SELECT B.*
+		FROM (
+	    	SELECT ROWNUM RNUM, A.*
+		    FROM (
+				SELECT 
+				    B.BP_ID,
+				    B.EMP_ID,
+				    B.BP_MOD_ID,
+				    B.BRD_ID,
+				    B.BP_TITLE,
+				    B.BP_CN,
+				    B.BP_REG_DT,
+				    B.BP_DEL_DT,
+				    B.BP_OP_YN,
+				    B.BP_CNT,
+				    B.BP_MOD_DT,
+				    B.BP_SHR_YN,
+				    B.BP_NTC_ID,
+				    B.BP_QNA_AS,
+				    E.EMP_NAME,
+				    C.CM_NAME,
+				    C.CM_ATT1
+				FROM 
+				    BOARD_POST B
+				INNER JOIN 
+				    EMP E ON (B.EMP_ID = E.EMP_ID)
+				INNER JOIN 
+					COMMON C ON (B.BRD_ID = C.CM_ID)
+				WHERE
+				    E.EMP_ID = #{empId}
+				AND bp_del_dt IS NULL			
+				<include refid="searchFragBoard" />
+			ORDER BY B.BP_REG_DT DESC
+	    	) A
+		) B
+		<where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+                <![CDATA[
+                RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+                ]]>
+			</if>
+		</where>
+	</select>
+		<select id="selectTotalRecordBoard">
+		WITH BOARD AS (
+			SELECT 
+			    B.BP_ID,
+			    B.EMP_ID,
+			    B.BP_MOD_ID,
+			    B.BRD_ID,
+			    B.BP_TITLE,
+			    B.BP_CN,
+			    B.BP_REG_DT,
+			    B.BP_DEL_DT,
+			    B.BP_OP_YN,
+			    B.BP_CNT,
+			    B.BP_MOD_DT,
+			    B.BP_SHR_YN,
+			    B.BP_NTC_ID,
+			    B.BP_QNA_AS,
+			    E.EMP_NAME,
+			    C.CM_NAME,
+			    C.CM_ATT1
+			FROM 
+			    BOARD_POST B
+			INNER JOIN 
+			    EMP E ON (B.EMP_ID = E.EMP_ID)
+			INNER JOIN 
+				COMMON C ON (B.BRD_ID = C.CM_ID)
+			WHERE
+			    E.EMP_ID = #{empId}
+			<include refid="searchFragBoard" />
+		)
+        SELECT COUNT(*) FROM BOARD
+	</select>
+	<!-- myboard end-->
+	
+	<!-- Mypage start-->
+	<update id="updateEmp" parameterType="EmpVO">
+		UPDATE EMP
+		SET
+			EMP.EMP_PASS = #{empPass,jdbcType=VARCHAR}
+			, EMP.EMP_RRNO = #{empRrno,jdbcType=VARCHAR}
+			, EMP.EMP_PHONE = #{empPhone,jdbcType=VARCHAR}
+			, EMP.EMP_ZIP = #{empZip,jdbcType=CHAR}
+			, EMP.EMP_ADDR = #{empAddr,jdbcType=VARCHAR}
+			, EMP.EMP_ADDR2 = #{empAddr2,jdbcType=VARCHAR}
+			, EMP.EMP_MAIL = #{empMail,jdbcType=VARCHAR}
+			, EMP.EMP_CAREER = #{empCareer,jdbcType=NUMERIC}
+			<if test="empImg neq null and empImg.length gt 0">
+			, EMP.EMP_IMG = #{empImg,jdbcType=VARCHAR}
+			</if>
+			<if test="empImage.length gt 0">
+			, EMP.EMP_IMAGE = #{empImage,jdbcType=BLOB}
+			</if>
+		WHERE EMP_ID = #{empId}
+	</update>
+	<!-- Mypage end-->
+</mapper>

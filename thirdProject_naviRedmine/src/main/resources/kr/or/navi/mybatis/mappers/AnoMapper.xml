@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.board.ano.dao.AnoDAO">
+	<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not detailCondition.empty">
+				AND
+				<if
+					test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.boardType)">
+					INSTR(COMMON.CM_ID, #{detailCondition.boardType}) > 0 AND
+				</if>
+				<if
+					test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.word)">
+					INSTR(board_post.bp_title, #{detailCondition.word}) > 0
+					OR
+					INSTR(board_post.bp_id, #{detailCondition.word}) > 0
+				</if>
+			</if>
+		</trim>
+	</sql>
+
+	<select id="selectAnoList" resultType="BoardPostVO" parameterType="PaginationInfo">
+		SELECT B.* FROM(
+		SELECT ROWNUM RNUM, A.* FROM (
+		SELECT
+		bp_id
+		,brd_id
+		, bp_title
+		, bp_reg_dt
+		, bp_cnt
+		, COMMON.CM_NAME as bp_ntc_name
+		FROM
+		board_post
+		JOIN COMMON ON
+		(BOARD_POST.BP_NTC_ID=COMMON.CM_ID)
+		WHERE BRD_ID = 'BN0001' 
+		AND bp_del_dt IS NULL
+		<include refid="searchFrag" />
+		ORDER BY BRD_ID ASC, BP_REG_DT DESC
+		) A
+		) B
+		<where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+
+
+	<select id="totalRecord" parameterType="PaginationInfo">
+		select COUNT(*)FROM
+		(SELECT
+		bp_id
+		, bp_title
+		, bp_reg_dt
+		, bp_cnt
+		, COMMON.CM_NAME as bp_ntc_name
+		FROM
+		board_post
+		JOIN COMMON ON
+		(BOARD_POST.BP_NTC_ID=COMMON.CM_ID)
+		WHERE BRD_ID = 'BN0001'
+		AND bp_del_dt IS NULL
+		<include refid="searchFrag" />
+		ORDER BY 
+		BP_REG_DT DESC)A
+	</select>
+	
+	<select id="selectAno" resultMap="anoMap">
+		SELECT
+		bp_id
+		, bp_title
+		, bp_reg_dt
+		, board_post.bp_ntc_id
+		, bp_mod_dt
+		, bp_cnt
+		, bp_cn
+		, COMMON.CM_NAME
+		as bp_ntc_name
+		FROM
+		board_post
+		JOIN COMMON ON
+		(BOARD_POST.BP_NTC_ID=COMMON.CM_ID)
+		WHERE
+		BRD_ID = 'BN0001'
+		AND BP_ID = #{bpId}
+	</select>
+	<resultMap type="BoardPostVO" id="anoMap" autoMapping="true">
+		<id column="BP_ID" property="bpId" />
+		<result column="BP_CN" property="bpCn" jdbcType="CLOB" />
+	</resultMap>
+
+
+	<delete id="deleteAno">
+		UPDATE board_post
+		SET
+		    bp_del_dt = SYSTIMESTAMP
+		WHERE
+		        bp_id = #{bpId}
+	</delete>
+	
+	
+	<update id="updateAno" parameterType="BoardPostVO">
+		UPDATE 
+			board_post
+		SET
+		    bp_title = #{vo.bpTitle}
+		   ,bp_ntc_id = #{vo.bpNtcId}
+		   ,bp_mod_id = #{vo.empId}
+		   , bp_mod_dt = SYSTIMESTAMP
+		   , bp_cn = #{vo.bpCn,jdbcType=CLOB}
+		WHERE
+			BOARD_POST.BRD_ID = 'BN0001'
+		AND
+		    BOARD_POST.bp_id = #{vo.bpId}
+	</update>
+	
+	<insert id="insertAno" parameterType="BoardPostVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="bpId">
+			SELECT 
+				'B' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(MAX(BP_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM BOARD_POST
+		</selectKey>
+		
+		INSERT INTO board_post (
+					    bp_id
+					    , emp_id
+					    , bp_mod_id
+					    , brd_id
+					    , bp_title
+					    , bp_cn
+					    , bp_reg_dt
+					    , bp_del_dt
+					    , bp_op_yn
+					    , bp_cnt
+					    , bp_mod_dt
+					    , bp_shr_yn
+					    , bp_ntc_id
+					    , bp_qna_as
+					    , bp_qna_yn
+					) VALUES (
+					    #{bpId}
+					  , #{empId}
+					  , NULL
+					  , 'BN0001'
+					  , #{bpTitle}
+					  , #{bpCn,jdbcType=CLOB}
+					  , SYSTIMESTAMP
+					  , NULL
+					  , NULL
+					  , 0
+					  , NULL
+					  , NULL
+					  , #{bpNtcId}
+					  , NULL
+					  , NULL
+					)
+	
+	</insert>
+	
+	<insert id="insertFile" parameterType="BoardPostFileVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="bpFileId">
+			SELECT 
+				'F' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(BP_FILE_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM BOARD_POST_FILE
+	</selectKey>
+			INSERT INTO board_post_file (
+			    bp_file_id
+			    , bp_id
+			    , bp_file_gb_id
+			    , bp_uuid_name
+			    , bp_org_nm
+			    , bp_main_img_yn
+			    , bp_file_size
+			) VALUES (
+			    #{bpFileId}
+			  , #{bpId}
+			  , #{bpFileGbId}
+			  , #{bpUuidName}
+			  , #{bpOrgNm}
+			  , NULL
+			  , #{bpFileSize}
+			)
+	</insert>
+	
+	<select id="selectFile" resultType="BoardPostFileVO">
+			SELECT
+			    bp_file_id
+			  , board_post.bp_id
+			  , bp_uuid_name
+			  , bp_org_nm
+			  , bp_file_gb_id
+			  , bp_main_img_yn
+			  , bp_file_size
+			FROM
+			    board_post_file
+			join
+			    board_post on(board_post_file.bp_id = board_post.bp_id)
+			where
+			    board_post_file.bp_id = #{bpId}
+	</select>
+	
+	
+	<select id="selectAnoMainList" resultType="BoardPostVO">
+			
+			
+		SELECT  A.* FROM (
+            SELECT
+            bp_id
+            , bp_title
+            , bp_reg_dt
+            , bp_cnt
+            , COMMON.CM_NAME as bp_ntc_name
+            FROM
+            board_post
+            JOIN COMMON ON
+            (BOARD_POST.BP_NTC_ID=COMMON.CM_ID)
+            order by bp_reg_dt desc
+      ) A 
+
+		<![CDATA[
+			WHERE ROWNUM <= 8
+		]]>
+
+	</select>
+	
+	<select id="getAttach" parameterType="String" resultType="BoardPostFileVO">
+			SELECT
+			    bp_file_id
+			  , bp_id
+			  , bp_file_gb_id
+			  , bp_uuid_name
+			  , bp_org_nm
+			  , bp_main_img_yn
+			  , bp_file_size
+			FROM
+			    board_post_file
+			WHERE
+			    bp_file_id = #{bpFileId}
+	</select>
+	
+	<update id="updateCnt">
+		UPDATE
+		    BOARD_POST
+		SET
+		  BP_CNT = BP_CNT + 1
+		WHERE
+		    BOARD_POST.BRD_ID = 'BN0001' AND BOARD_POST.BP_ID = #{bpId}
+	</update>
+	
+	<delete id="deleteFileSaveFile">
+		DELETE FROM BOARD_POST_FILE WHERE bp_file_id = #{bpFileId}
+	</delete>
+	
+</mapper>

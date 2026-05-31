@@ -1,0 +1,99 @@
+@charset "UTF-8";
+
+:root {
+	 --border-angle: 0turn;
+	 --main-bg: conic-gradient(from var(--border-angle), #213, #112 5%, #112 60%, #213 95%);
+	 --gradient-border: conic-gradient(from var(--border-angle), transparent 25%, #08f, #f03 99%, transparent);
+}
+html{position:relative}
+
+
+#recomModal .modal-dialog { max-height:470px}
+.msgBox{
+	padding: 28px 20px 20px;
+	max-width: 500px;
+	width:100%;
+	height: 100px;
+	opacity:0;
+	visibility:hidden;
+	transition:opacity 0.3s;
+	position:absolute;
+	top: 176px;
+	/* vertical-align: middle; */
+	left: 50%;
+	margin-left: -250px;
+	/* background:rgba(0,0,0,0.5); */
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	z-index:999
+	}
+.msgBox.visible:after {
+	
+content:'';
+	
+display:block;
+	
+width: 100%;
+	
+height: 100%;
+	
+position:absolute;
+	
+color: white;
+	
+text-shadow: 0 1px 0 #000;
+	
+--border-angle: 0turn;
+	
+--main-bg: conic-gradient(from var(--border-angle), rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.8) 5%, rgba(0, 0, 0, 0.8) 60%, #213 95%);
+	
+border: solid 5px transparent;
+	
+border-radius: 20px;
+	
+--gradient-border: conic-gradient(from var(--border-angle), transparent 25%, #FFE957, #f03 99%, transparent);
+/* --gradient-border: conic-gradient(from var(--border-angle), transparent 25%, #c0baf5, #FFE957 99%, transparent); */
+background: var(--main-bg) padding-box, var(--gradient-border) border-box, var(--main-bg) border-box;
+	
+background-position: center center;
+	
+animation: bg-spin 3s linear infinite;
+	
+z-index: 1;
+}
+	
+.msgBox.visible{opacity:1; visibility:visible;}
+.msg_inner{position:relative;z-index:10}
+.msg_inner *{ height:auto; margin:0;color:#fff; line-height:1.2}
+#message {font-size: 26px;font-family:'GmarketSans';height: auto;font-weight: bold;line-height: 1;margin-bottom:10px}
+#searchForm{opacity:0; position:absolute; left:0;}
+/* animation*/
+
+ @keyframes bg-spin {
+	 to {
+		 --border-angle: 1turn;
+	}
+}
+ .box:hover {
+	 animation-play-state: paused;
+}
+ @property --border-angle {
+	 syntax: "<angle>";
+	 inherits: true;
+	 initial-value: 0turn;
+}
+ 
+#speech{min-width:85px}
+ .nodata{
+ margin: 0 auto;
+ width: 98%;
+ margin: 0 auto;
+ padding: 40px 40px 35px;
+ background:rgba(192,186,245,0.5);
+ font-size:20px;
+ font-weight:bold;
+ margin-top:20px;
+ border-radius:5px;
+ color:#333
+ }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.admin.board.dao.AdminBoardDAO">
+
+	<delete id="deleteCheckedProject">
+		UPDATE BOARD_POST SET BP_DEL_DT = SYSTIMESTAMP WHERE BP_ID IN
+		<foreach collection="boards" item="board" open="(" close=")" separator=",">
+			#{board.bpId}
+		</foreach>
+	</delete>
+
+</mapper> 

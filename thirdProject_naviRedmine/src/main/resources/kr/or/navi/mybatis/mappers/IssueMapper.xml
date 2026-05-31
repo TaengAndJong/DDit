@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.project.dao.IssueDAO">
+	<resultMap type="IssueVO" id="issueMap" autoMapping="true">
+		<id column="ISSUE_ID" property="issueId"/>
+		<result column="ISSUE_CN" property="issueCn" jdbcType="CLOB"/>
+	</resultMap>
+	
+	<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not paging.detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.imprtId)">
+					 issue.imprt_id = #{paging.detailCondition.imprtId} AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.issueId)">
+					issue.clsfc_id = #{paging.detailCondition.issueId} AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.issueTitle)">
+				    INSTR(issue.issue_title, #{paging.detailCondition.issueTitle}) > 0 
+				</if>
+			</if>
+		</trim>
+	</sql>
+	<select id="selectIssueList" parameterType="PaginationInfo" resultMap="issueMap">
+	SELECT B.*
+		FROM(
+    SELECT ROWNUM RNUM, A.*
+			FROM(
+		SELECT
+                    issue_id
+                  , pro_id
+                  , issue_reg_id
+                  , emp.emp_name
+                  , issue.imprt_id
+                  , imp.cm_name as IMP_NAME
+                  , clsfc_id
+                  , states.cm_name as STATE_NAME
+                  , issue_title
+                  , issue_reg_dt
+                FROM
+                    issue join common imp on issue.imprt_id=imp.cm_id
+                    join common states on issue.clsfc_id=states.cm_id 
+                    join EMP ON(issue.issue_reg_id=emp.emp_id)
+                    WHERE issue.pro_id = #{proId}
+                    <include refid="searchFrag" />
+                    and issue.issue_del_dt is null
+                    order by issue.issue_reg_dt desc
+                    )A
+               ) B
+     <where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+				<![CDATA[
+					RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectTotalRecord">
+		WITH ISSE AS (
+			SELECT
+                    issue_id
+                  , pro_id
+                  , issue_reg_id
+                  , emp.emp_name
+                  , issue.imprt_id
+                  , imp.cm_name as IMP_NAME
+                  , clsfc_id
+                  , states.cm_name as STATE_NAME
+                  , issue_title
+                  , issue_reg_dt
+                FROM
+                    issue join common imp on issue.imprt_id=imp.cm_id
+                    join common states on issue.clsfc_id=states.cm_id 
+                    join EMP ON(issue.issue_reg_id=emp.emp_id)
+                    WHERE issue.pro_id = #{proId1}
+                    <include refid="searchFrag" />
+                    and issue.issue_del_dt is null
+			    )
+			    SELECT COUNT(*) FROM ISSE
+	</select>
+	
+	<select id="selectIssue" resultMap="issueMap">
+		SELECT
+           issue_id
+         , pro_id
+         , issue_reg_id
+         , emp.emp_name
+         , issue.imprt_id
+         , imp.cm_name as IMP_NAME
+         , clsfc_id
+         , states.cm_name as STATE_NAME
+         , issue_title
+         , issue_reg_dt
+         , issue.issue_cn
+         , dept.dept_name
+         , position.ps_name
+       FROM
+           issue join common imp on issue.imprt_id=imp.cm_id
+           join common states on issue.clsfc_id=states.cm_id 
+           join EMP ON(issue.issue_reg_id=emp.emp_id)
+           join DEPT ON(emp.dept_id=dept.dept_id)
+           join position on(emp.ps_id=position.ps_id)
+		WHERE
+			issue_id = #{issueId}
+	</select>
+	
+	<delete id="deleteIssue">
+		UPDATE issue
+		SET
+		    issue_del_dt= SYSTIMESTAMP
+		WHERE
+		        issue_id = #{issueId}
+	</delete>
+	
+	<update id="updateIssue" parameterType="IssueVO">
+	UPDATE ISSUE
+		SET
+		    imprt_id = #{imprtId},
+		    clsfc_id = #{clsfcId},
+		    issue_title = #{issueTitle},
+		    issue_cn =  #{issueCn,jdbcType=CLOB},
+		    issue_mod_dt = SYSTIMESTAMP
+		WHERE
+		        issue_id = #{issueId}
+	
+	</update>
+	
+	<insert id="insertIssue" parameterType="IssueVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="issueId">
+			select 
+		    'I'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(ISSUE_ID),5)),0)+1,5,'0') 
+		    FROM ISSUE
+		</selectKey>
+		INSERT INTO issue (
+		    issue_id
+		    , pro_id
+		    , issue_reg_id
+		    , imprt_id
+		    , clsfc_id
+		    , issue_title
+		    , issue_cn
+		    , issue_reg_dt
+		) VALUES (
+		    #{issueId}
+		  , #{proId}
+		  , #{issueRegId}
+		  , #{imprtId}
+		  , #{clsfcId}
+		  , #{issueTitle}
+		  , #{issueCn,jdbcType=CLOB}
+		  , SYSTIMESTAMP
+		)
+	</insert>
+	<resultMap type="IssueCommentVO" id="issueCommentMap" autoMapping="true">
+		<id column="IC_ID" property="icId"/>
+		<result column="IC_CN" property="icCn" jdbcType="CLOB"/>
+		<association property="emp" javaType="EmpVO">
+			<result column="EMP_IMAGE" property="empImage" />
+		</association>
+	</resultMap>
+	
+	<select id="selectIssueCommentList" resultMap="issueCommentMap">
+		SELECT
+			  IC_ID,
+	          EMP_NAME,
+	          emp_Image,
+	          DEPT.DEPT_NAME,
+	          PS_NAME,
+	          IC_TOP_ID,
+	          PRO_ID,
+	          IC_REG_ID,
+	          ISSUE_ID,
+	          IC_REG_DT,
+	          IC_MOD_DT,
+	          IC_CN,
+	          IC_DEL_YN, 
+	          LEVEL as depth
+		FROM
+			  ISSUE_COMMENT 
+		JOIN EMP ON(ISSUE_COMMENT.IC_REG_ID=EMP.EMP_ID) 
+		JOIN DEPT ON (EMP.DEPT_ID=DEPT.DEPT_ID)
+	    JOIN POSITION ON(EMP.PS_ID = POSITION.PS_ID)
+	    WHERE ISSUE_ID= #{issueId}
+	
+		START WITH issue_id = #{issueId} and ic_top_id IS NULL
+		CONNECT BY PRIOR
+			ic_id = ic_top_id
+		ORDER SIBLINGS BY CASE
+		WHEN ic_top_id IS NULL THEN ic_reg_dt
+		ELSE (SELECT ic_reg_dt FROM issue_comment WHERE ic_id = ic_top_id) END, ic_reg_dt
+	</select>
+	
+	<delete id="deleteIssueComment" >
+	UPDATE ISSUE_COMMENT SET IC_DEL_YN = 'Y' WHERE IC_ID IN  #{icId}
+	</delete>
+	
+	<insert id="insertIssueComment" parameterType="IssueCommentVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="icId">
+			SELECT 
+		    'I'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(IC_ID),5)),0)+1,5,'0') 
+		    FROM ISSUE_COMMENT
+		</selectKey>
+		INSERT INTO ISSUE_COMMENT (
+			IC_ID
+			, IC_TOP_ID
+			, PRO_ID
+			, IC_REG_ID
+			, ISSUE_ID
+			, IC_REG_DT
+			, IC_CN
+			, IC_DEL_YN
+		) VALUES (
+		#{icId}
+		, #{icTopId}
+		, #{proId}
+		, #{icRegId}
+		, #{issueId}
+		, SYSTIMESTAMP
+		, #{icCn,jdbcType=CLOB}
+		, 'N'
+		)
+	</insert>
+	
+	
+	<insert id="insertFile" parameterType="IssueFileVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="issffId">
+			SELECT 
+				'I' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(issff_Id), 2)
+				            ), 0) + 1, 5, '0')
+							FROM issue_file
+	</selectKey>
+	INSERT INTO issue_file (
+		    issff_id
+		    , issue_id
+		    , pro_id
+		    , issf_reg_id
+		    , issf_gb_id
+		    , issf_attch_file
+		    , issf_org_nm
+		    , issf_file_size
+		    , issue_uuid_name
+		) VALUES (
+		    #{issffId}
+		  , #{issueId}
+		  , #{proId}
+		  , NULL
+		  , #{issfGbId}
+		  , NULL
+		  , #{issfOrgNm}
+		  , #{issfFileSize}
+		  , #{issueUuidName}
+		)
+	</insert>
+	
+	<select id="selectIssueFileList" resultType="IssueFileVO">
+	SELECT
+	    issff_id
+	  , issue_id
+	  , pro_id
+	  , issf_reg_id
+	  , issf_gb_id
+	  , issf_attch_file
+	  , issf_org_nm
+	  , issf_file_size
+	  , issue_uuid_name
+	FROM
+	    issue_file
+    WHERE
+		issue_id = #{issueId}
+	</select>
+	
+	<select id="selectIssueFile" resultType="IssueFileVO">
+	SELECT
+	    issff_id
+	  , issue_id
+	  , pro_id
+	  , issf_reg_id
+	  , issf_gb_id
+	  , issf_attch_file
+	  , issf_org_nm
+	  , issf_file_size
+	  , issue_uuid_name
+	FROM
+	    issue_file
+	 WHERE issff_id = #{issffId}
+		</select>
+	
+	<delete id="deleteIssueFile">
+		DELETE FROM 
+			issue_file
+		WHERE
+			issff_id = #{issfId}
+	</delete>
+</mapper>

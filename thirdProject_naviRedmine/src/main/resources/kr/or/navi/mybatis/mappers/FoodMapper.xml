@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.quick.food.dao.FoodDAO">
+
+
+	<select id="selectFoodList" resultType="FoodVO">
+		SELECT 
+			A.*
+		FROM
+		(SELECT
+		    ROWNUM AS RNUM,
+		    food_id,
+		    food_place,
+		    food_name,
+		    food_tel,
+		    food_addr,
+		    food_imgurl,
+		    food_opentime,
+		    food_closetime
+		FROM
+		    food) A
+	</select>
+	<!--  WHERE INSTR(FOOD_NAME, '냉') > 0	 -->
+	<sql id="searchFrag">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.searchWord)">
+			INSTR(FOOD_NAME, #{paging.simpleCondition.searchWord}) > 0 
+		</if>
+	</sql>
+	
+	<select id="selectVoiceFoodList" resultType="FoodVO" parameterType="PaginationInfo">
+	select
+		 a.*
+		from
+		(SELECT
+		    ROWNUM AS RNUM,
+		    FOOD_ID,
+		    FOOD_PLACE,
+		    FOOD_NAME,
+		    FOOD_TEL,
+		    FOOD_ADDR,
+		    FOOD_IMGURL,
+		    FOOD_OPENTIME,
+		    FOOD_CLOSETIME
+		FROM
+		    FOOD
+		<where>
+			<include refid="searchFrag" />
+		</where>
+		)A
+		<![CDATA[
+			WHERE A.RNUM >= #{paging.startRow} AND A.RNUM <= #{paging.endRow}
+		]]>
+		ORDER BY A.FOOD_ID
+		
+	</select>
+	
+	<select id="selectFoodListTotalRecord" parameterType="PaginationInfo">
+		SELECT
+		   COUNT(*)
+		FROM
+		    FOOD
+		<where>
+			<include refid="searchFrag" />
+		</where>
+	</select>
+	
+	<select id="selectOne" resultType="FoodVO" parameterType="string">
+	    SELECT
+	        TRIM(FOOD_ID) AS FOOD_ID,
+	        FOOD_PLACE,
+	        FOOD_NAME,
+	        FOOD_TEL,
+	        FOOD_ADDR,
+	        FOOD_IMGURL,
+	        FOOD_OPENTIME,
+	        FOOD_CLOSETIME
+	    FROM
+	        FOOD
+	    WHERE FOOD_ID = '${foodId, jdbcType=VARCHAR}'
+	    ORDER BY FOOD_ID
+	</select>
+
+	<select id="selectRecomFoodList" resultType="FoodVO">
+		SELECT 
+			F.FOOD_ID,
+			F.FOOD_PLACE,
+			F.FOOD_NAME,
+			F.FOOD_TEL,
+			F.FOOD_ADDR,
+			F.FOOD_IMGURL,
+			F.FOOD_OPENTIME,
+			F.FOOD_CLOSETIME,
+			FR.WEATHER_ID,
+			FR.RANK
+		FROM 
+			FOOD F
+			JOIN FOOD_RECOM FR ON F.FOOD_ID = FR.FOOD_ID
+		WHERE 
+			FR.AGE = '${map.age}' AND 
+			FR.GEN = '${map.gen}' AND 
+			FR.WEATHER_ID = '${map.weatherId}'
+		ORDER BY 
+			FR.RANK
+	</select>
+	
+
+	<insert id="insertFoodViews">
+		INSERT INTO food_views (
+		    emp_id
+		    , food_id
+			, weather_id
+		) VALUES (
+		    #{empId}
+		  , #{foodId}
+		  , #{weatherId}
+		)
+	</insert>
+
+</mapper>

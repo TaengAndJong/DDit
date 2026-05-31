@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd" >
+<tiles-definitions>
+	<definition name="abstractAdminParent" template="/WEB-INF/admin_layout.jsp">
+		<put-attribute name="title" value="SKJ-Project Management System" />
+	  	<put-attribute name="preScript" value="/WEB-INF/includee/admin/adminPreScript.jsp" />
+	  	
+	  	<put-attribute name="headerMenu" value="/WEB-INF/includee/admin/adminHeader.jsp" />
+	  	<put-attribute name="subMenu" value="/WEB-INF/includee/admin/sub2/dummyMenu.jsp" />
+	  	<put-attribute name="footer" value="/WEB-INF/includee/admin/adminFooter.jsp" />
+	  	<put-attribute name="postScript" value="/WEB-INF/includee/postScript.jsp" />
+	</definition>
+	
+	<definition name="empSubMenu" extends="abstractAdminParent" preparer="adminEmpPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/admin/sub2/adminHeader2.jsp" />
+	</definition>
+	
+	<definition name="admin/emp/*" extends="empSubMenu">
+	<put-attribute name="subMenu" value="/WEB-INF/includee/admin/sub2/empMenu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/admin/emp/{1}.jsp" />
+	</definition>
+	
+	<definition name="admin/emp/*/*" extends="empSubMenu">
+	<put-attribute name="subMenu" value="/WEB-INF/includee/admin/sub2/empMenu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/admin/emp/{1}/{2}.jsp" />
+	</definition>
+	
+	<definition name="admin/emp/*/*/*" extends="empSubMenu">
+	<put-attribute name="subMenu" value="/WEB-INF/includee/admin/sub2/empMenu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/admin/emp/{1}/{2}/{3}.jsp" />
+	</definition>
+
+	<!-- 2차부모 -->
+	<definition name="adminCommonMain" extends="abstractAdminParent" preparer="commonPreparer">
+		<put-attribute name="subHeaderMenu" value="/WEB-INF/includee/admin/sub2/adminSubHeader.jsp" />
+	</definition>
+	<!-- 2차부모 -->
+	
+	<definition name="admin/*" extends="adminCommonMain">
+		<put-attribute name="contentPage" value="/WEB-INF/views/admin/{1}.jsp" />
+	</definition>
+	<definition name="admin/*/*" extends="adminCommonMain">
+		<put-attribute name="contentPage" value="/WEB-INF/views/admin/{1}/{2}.jsp" />
+	</definition>
+	<definition name="admin/*/*/*" extends="adminCommonMain">
+		<put-attribute name="contentPage" value="/WEB-INF/views/admin/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+	
+	
+</tiles-definitions>

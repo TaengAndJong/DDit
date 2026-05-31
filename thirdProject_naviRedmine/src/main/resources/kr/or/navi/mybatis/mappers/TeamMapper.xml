@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.project.dao.TeamDAO">
+<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not paging.detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.role)">
+					 INSTR(#{paging.detailCondition.role},team.role_id ) > 0  AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.state)">
+					team_yn =  #{paging.detailCondition.state} AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.word)">
+					INSTR(emp_name, #{paging.detailCondition.word}) > 0 
+					OR
+					INSTR(dept.dept_name, #{paging.detailCondition.word}) > 0 
+					OR
+					INSTR(emp.emp_id, #{paging.detailCondition.word}) > 0 
+				</if>
+			</if>
+		</trim>
+	</sql>
+<resultMap type="TeamVO" id="teamMap" autoMapping="true">
+	<id column="PRO_ID" property="proId"/>
+	<id column="EMP_ID" property="empId"/>
+	<association property="emp" autoMapping="true">
+	</association>
+	<collection property="taskList" javaType="list" ofType="TaskVO" autoMapping="true">
+	<id column="TASK_ID" property="taskId"/>
+	</collection>
+</resultMap>
+ <select id="selectTeam" resultMap="teamMap">
+		WITH DUMMY_EMP AS (
+					SELECT
+                    team.pro_id,
+                     team.team_yn,
+					    emp.emp_id,
+                        dept.dept_name,
+					    emp.role_id,
+                        EMP.ps_id,
+                        POSITION.PS_NAME ,
+					    cn_id,
+					    emp_img,
+					    emp_name,
+					    emp_age,
+					    emp_gen,
+					    emp_pass,
+					    emp_rrno,
+					    emp_phone,
+					    emp_tel,
+					    emp_zip,
+					    emp_addr,
+					    emp_mail,
+					    emp_cmp_ymd,
+					    emp_career,
+					    emp_quit_dt,
+					    emp_limit_yn,
+					    emp_bk_id,
+					    emp_fm_id
+					FROM
+					    emp join team on emp.emp_id=team.emp_id  join dept on dept.dept_id = emp.dept_id
+					      JOIN POSITION ON emp.PS_ID=POSITION.PS_ID
+					union
+					SELECT
+                        team.pro_id,
+                         team.team_yn,
+					    emp.emp_id,
+                        dept.dept_name,
+					    team.role_id,
+                        EMP.ps_id,
+                        POSITION.PS_NAME ,
+					    cn_id,
+					    emp_img,
+					    emp_name,
+					    emp_age,
+					    emp_gen,
+					    emp_pass,
+					    emp_rrno,
+					    emp_phone,
+					    emp_tel,
+					    emp_zip,
+					    emp_addr,
+					    emp_mail,
+					    emp_cmp_ymd,
+					    emp_career,
+					    emp_quit_dt,
+					    emp_limit_yn,
+					    emp_bk_id,
+					    emp_fm_id
+					FROM
+					    emp join team on emp.emp_id=team.emp_id  join dept on dept.dept_id = emp.dept_id
+                        JOIN POSITION ON EMP.PS_ID=POSITION.PS_ID
+					)
+					SELECT * FROM DUMMY_EMP
+                    where pro_id = #{proId}
+ </select>
+ <select id="selectTeamList">
+ WITH DUMMY_EMP AS (
+					SELECT
+                    team.pro_id,
+					    emp.emp_id,
+                        dept.dept_name,
+					    ps_id,
+					    emp.role_id,
+					    cn_id,
+					    emp_img,
+					    emp_name,
+					    emp_age,
+					    emp_gen,
+					    emp_pass,
+					    emp_rrno,
+					    emp_phone,
+					    emp_tel,
+					    emp_zip,
+					    emp_addr,
+					    emp_mail,
+					    emp_cmp_ymd,
+					    emp_career,
+					    emp_quit_dt,
+					    emp_limit_yn,
+					    emp_bk_id,
+					    emp_fm_id
+					FROM
+					    emp join team on emp.emp_id=team.emp_id  join dept on dept.dept_id = emp.dept_id
+					union
+					SELECT
+                        team.pro_id,
+					    emp.emp_id,
+                        dept.dept_name,
+					    ps_id,
+					    team.role_id,
+					    cn_id,
+					    emp_img,
+					    emp_name,
+					    emp_age,
+					    emp_gen,
+					    emp_pass,
+					    emp_rrno,
+					    emp_phone,
+					    emp_tel,
+					    emp_zip,
+					    emp_addr,
+					    emp_mail,
+					    emp_cmp_ymd,
+					    emp_career,
+					    emp_quit_dt,
+					    emp_limit_yn,
+					    emp_bk_id,
+					    emp_fm_id
+					FROM
+					    emp join team on emp.emp_id=team.emp_id  join dept on dept.dept_id = emp.dept_id
+					)
+					SELECT * FROM DUMMY_EMP
+                    where pro_id = #{proId}
+                    AND EMP_ID = #{empId}
+ </select>
+ 
+ <select id="selectTeams" resultMap="teamMap">
+	  SELECT
+	    team.pro_id
+	  , team.emp_id
+	  , team.role_id
+	  , team_yn
+	  , emp.dept_id
+	  , dept_name
+	  , position.ps_id
+	  , position.ps_name
+	  , cn_id
+	  , emp_img
+	  , emp_name
+	  , emp_age
+	  , emp_gen
+	  , emp_pass
+	  , emp_rrno
+	  , emp_phone
+	  , emp_tel
+	  , emp_zip
+	  , emp_addr
+	  , emp_mail
+	  , emp_cmp_ymd
+	  , emp_career
+	  , emp_quit_dt
+	  , emp_limit_yn
+	  , emp_cert_cg
+	  , emp_fm_id
+	  , emp_bk_id
+	  , emp_addr2
+      , task_id
+      , TPS_ID
+	FROM
+	    team join emp on(team.emp_id=emp.emp_id)
+	    join dept on(emp.dept_id=dept.dept_id)
+	    join position on(emp.ps_id=position.ps_Id)
+        left outer join task on(team.emp_id=task.TASK_MAN_ID)
+	WHERE team.PRO_ID= #{proId} and
+	team.role_id != 'ROLE_PL'
+	<include refid="searchFrag" />
+ </select>
+ <select id="selectTeamAll" resultMap="teamMap">
+	  SELECT
+	    team.pro_id
+	  , team.emp_id
+	  , team.role_id
+	  , team_yn
+	  , emp.dept_id
+	  , dept_name
+	  , position.ps_id
+	  , position.ps_name
+	  , cn_id
+	  , emp_img
+	  , emp_name
+	  , emp_age
+	  , emp_gen
+	  , emp_pass
+	  , emp_rrno
+	  , emp_phone
+	  , emp_tel
+	  , emp_zip
+	  , emp_addr
+	  , emp_mail
+	  , emp_cmp_ymd
+	  , emp_career
+	  , emp_quit_dt
+	  , emp_limit_yn
+	  , emp_cert_cg
+	  , emp_fm_id
+	  , emp_bk_id
+	  , emp_addr2
+      , task_id
+      , TPS_ID
+	FROM
+	    team join emp on(team.emp_id=emp.emp_id)
+	    join dept on(emp.dept_id=dept.dept_id)
+	    join position on(emp.ps_id=position.ps_Id)
+        left outer join task on(team.emp_id=task.TASK_MAN_ID)
+	WHERE team.PRO_ID= #{proId}
+ </select>
+ <select id="selectTotalRecord">
+	 select count(*) from
+	(
+	SELECT
+	    pro_id
+	  , team.emp_id
+	  , team.role_id
+	  , team_yn
+	  , emp.dept_id
+	  , dept_name
+	  , position.ps_id
+	  , position.ps_name
+	  , cn_id
+	  , emp_img
+	  , emp_name
+	  , emp_age
+	  , emp_gen
+	  , emp_pass
+	  , emp_rrno
+	  , emp_phone
+	  , emp_tel
+	  , emp_zip
+	  , emp_addr
+	  , emp_mail
+	  , emp_cmp_ymd
+	  , emp_career
+	  , emp_quit_dt
+	  , emp_limit_yn
+	  , emp_cert_cg
+	  , emp_fm_id
+	  , emp_bk_id
+	  , emp_addr2
+	FROM
+	    team join emp on(team.emp_id=emp.emp_id)
+	    join dept on(emp.dept_id=dept.dept_id)
+	    join position on(emp.ps_id=position.ps_Id)
+	WHERE PRO_ID= #{proId} and
+	team.role_id != 'ROLE_PL'
+	<include refid="searchFrag" />)
+ </select>
+ 
+ <update id="updateTeamYN">
+    UPDATE team
+	SET
+	    team_yn = #{yn}
+	WHERE
+	        pro_id = #{proId}
+	    AND emp_id = #{empId}
+ </update>
+ 
+ <select id="selectTeamYN" >
+    SELECT
+	team_yn
+	FROM
+	    team
+	WHERE
+	pro_id= #{proId}
+	and
+	emp_id= #{empId}
+ </select>
+ <select id="selectPlId">
+ 	select emp_id from team where role_id = 'ROLE_PL' AND pro_id = #{proId}
+ </select>
+</mapper>

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.board.form.dao.FormDAO">
+	<sql id="searchFrag">
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			and
+				<choose>
+					<when test="simpleCondition.searchType eq 'title'">
+						INSTR(BP_TITLE, #{simpleCondition.searchWord}) > 0	
+					</when>
+					<when test="simpleCondition.searchType eq 'name'">
+						INSTR(EMP.EMP_NAME, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(BP_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(EMP.EMP_NAME, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+	</sql>
+
+<select id="selectAnoListBoard" resultType="BoardPostVO">
+		SELECT B.* FROM(
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT
+					bp_id
+					, bp_title
+					, bp_reg_dt
+					, bp_cnt
+					, bp_ntc_id
+					, COMMON.CM_NAME as bp_ntc_name
+				FROM
+					board_post
+				JOIN COMMON ON
+					(BOARD_POST.BP_NTC_ID=COMMON.CM_ID)
+				WHERE BRD_ID = 'BN0001' 
+				and bp_ntc_id ='BN0002'
+				AND bp_del_dt IS NULL
+			ORDER BY BP_REG_DT DESC
+			) A
+			
+		) B
+		<![CDATA[
+			where
+				rnum <=3
+			]]>
+	</select>
+	
+
+<select id="selectForm" resultType="BoardPostVO" parameterType="String">
+				SELECT
+					bp_id
+					,bp_title
+					, emp.emp_name
+					, bp_mod_dt
+					, bp_reg_dt
+					, bp_mod_id
+					, brd_id
+					, bp_cnt
+					, bp_cn
+				FROM
+					board_post
+				JOIN 
+					EMP ON(board_post.EMP_ID = EMP.EMP_ID)
+				WHERE 
+					BOARD_POST.BRD_ID = 'BN0002' AND BOARD_POST.BP_ID = #{bpId}
+	</select>
+	<resultMap type="BoardPostVO" id="formMap" autoMapping="true">
+		<id property="bpId" column="BP_ID"/>
+		<result property="bpCn" column="BP_CN" jdbcType="CLOB"/>
+	</resultMap>
+
+	<select id="selectFormList"  resultMap="formMap" parameterType="PaginationInfo">
+		SELECT B.*
+			FROM (
+	    		SELECT ROWNUM RNUM, A.*
+	    		FROM (
+					SELECT
+						BP_ID
+						, BOARD_POST.EMP_ID
+						, BRD_ID
+						, BP_TITLE
+						, BP_REG_DT	
+						, BP_MOD_DT	
+						, BP_CNT
+						, EMP.EMP_NAME
+					FROM
+						board_post
+					inner join 
+						emp on(board_post.emp_id = emp.emp_id)
+					where 
+						BRD_ID = 'BN0002'
+						AND bp_del_dt IS NULL
+					<include refid="searchFrag" />
+					ORDER BY BP_REG_DT DESC
+						) A
+					) B
+					<where>
+						<if test="startRow gt 0 and endRow gt 0">
+							<![CDATA[
+								RNUM >= #{startRow} AND RNUM <= #{endRow}
+							]]>
+						</if>
+					</where>
+	</select>
+
+	<select id="selectTotalRecord" resultType="int" parameterType="PaginationInfo">
+		SELECT COUNT(*) FROM
+			(SELECT
+					BP_ID
+					, BOARD_POST.EMP_ID
+					, BRD_ID
+					, BP_TITLE
+					, BP_REG_DT
+					, BP_CNT
+					, EMP.EMP_NAME
+				FROM
+					board_post
+				inner join 
+					emp on(board_post.emp_id = emp.emp_id)
+				where 
+					BRD_ID = 'BN0002'
+					AND bp_del_dt IS NULL
+				<include refid="searchFrag" />
+				ORDER BY 
+					BP_REG_DT DESC
+					) A
+		</select>
+	
+	
+	
+	<update id="updateForm" parameterType="BoardPostVO">
+		UPDATE
+			BOARD_POST
+		SET
+			BP_TITLE = #{vo.bpTitle}
+			, BP_MOD_ID = #{vo.bpModId}
+			, BP_MOD_DT = SYSTIMESTAMP
+			, BP_CN = #{vo.bpCn,jdbcType=CLOB}
+		WHERE
+			BOARD_POST.BRD_ID = 'BN0002'
+		AND
+			BOARD_POST.BP_ID = #{vo.bpId}
+	</update>
+	
+	<update id="updateDetailForm" parameterType="BoardPostVO">
+			UPDATE 
+				board_post
+			SET
+			    bp_title = #{bpTitle}
+				bp_mod_id= 'BN0002',
+			    bp_mod_dt = SYSTIMESTAMP,
+			    bp_cn = #{bpCn,jdbcType=CLOB},
+			WHERE
+			        bp_id = #{bpId}
+	</update>
+	
+	<delete id="deleteForm">
+			UPDATE
+				BOARD_POST
+			SET
+				BP_DEL_DT = SYSTIMESTAMP
+			WHERE
+				BP_ID= #{bpId}
+	</delete>
+	
+	<insert id="insertForm" parameterType="BoardPostVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="bpId">
+			SELECT 
+				'B' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(MAX(BP_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM BOARD_POST
+	</selectKey>
+	INSERT INTO board_post (
+		    bp_id
+		    , emp_id
+		    , bp_mod_id
+		    , brd_id
+		    , bp_title
+		    , bp_cn
+		    , bp_reg_dt
+		    , bp_del_dt
+		    , bp_op_yn
+		    , bp_cnt
+		    , bp_mod_dt
+		    , bp_shr_yn
+		    , bp_ntc_id
+		    , bp_qna_as
+		) VALUES (
+		    #{bpId}
+		  , #{empId}
+		  , NULL
+		  , #{brdId}
+		  , #{bpTitle}
+		  , #{bpCn, jdbcType=CLOB}
+		  , SYSTIMESTAMP
+		  , NULL
+		  , NULL
+		  , 0
+		  , NULL
+		  , NULL
+		  , #{bpNtcId}
+		  , NULL
+		)
+	</insert>
+	
+	<insert id="insertFile" parameterType="BoardPostFileVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="bpFileId">
+			SELECT 
+				'F' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(BP_FILE_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM BOARD_POST_FILE
+	</selectKey>
+			INSERT INTO board_post_file (
+			    bp_file_id
+			    , bp_id
+			    , bp_file_gb_id
+			    , bp_uuid_name
+			    , bp_org_nm
+			    , bp_main_img_yn
+			    , bp_file_size
+			) VALUES (
+			    #{bpFileId}
+			  , #{bpId}
+			  , #{bpFileGbId}
+			  , #{bpUuidName}
+			  , #{bpOrgNm}
+			  , NULL
+			  , #{bpFileSize}
+			)
+	</insert>
+	
+	<select id="selectFile" resultType="BoardPostFileVO">
+			SELECT
+			    bp_file_id
+			  , board_post.bp_id
+			  , bp_uuid_name
+			  , bp_org_nm
+			  , bp_file_gb_id
+			  , bp_main_img_yn
+			  , bp_file_size
+			FROM
+			    board_post_file
+			join
+			    board_post on(board_post_file.bp_id = board_post.bp_id)
+			where
+			    board_post_file.bp_id = #{bpId}
+	</select>
+	
+	<select id="getAttach" parameterType="String" resultType="BoardPostFileVO">
+			SELECT
+			    bp_file_id
+			  , bp_id
+			  , bp_file_gb_id
+			  , bp_uuid_name
+			  , bp_org_nm
+			  , bp_main_img_yn
+			  , bp_file_size
+			FROM
+			    board_post_file
+			WHERE
+			    bp_file_id = #{bpFileId}
+	</select>
+	
+	<update id="updateCnt">
+		UPDATE
+		    BOARD_POST
+		SET
+		  BP_CNT = BP_CNT + 1
+		WHERE
+		    BOARD_POST.BRD_ID = 'BN0002' AND BOARD_POST.BP_ID = #{bpId}
+	</update>
+	
+	<delete id="deleteFileSaveFile">
+		DELETE FROM BOARD_POST_FILE WHERE bp_file_id = #{bpFileId}
+	</delete>
+	
+</mapper>

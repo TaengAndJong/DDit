@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd" >
+<tiles-definitions>
+	<definition name="auth/*" template="/WEB-INF/auth_layout.jsp">
+		<put-attribute name="title" value="SKJ-Project Management System" />
+		<put-attribute name="preScript" value="/WEB-INF/includee/preScript.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/auth/{1}.jsp" />
+		<put-attribute name="postScript" value="/WEB-INF/includee/postScript.jsp" />
+	</definition>
+
+	<!-- 1차부모 -->
+	<definition name="abstractParent" template="/WEB-INF/layout.jsp">
+		<put-attribute name="title" value="SKJ-Project Management System" />
+	  	<put-attribute name="preScript" value="/WEB-INF/includee/preScript.jsp" />
+	  	<put-attribute name="footer" value="/WEB-INF/includee/footer.jsp" />
+	  	<put-attribute name="postScript" value="/WEB-INF/includee/postScript.jsp" />
+	</definition>
+	<!-- 1차부모 -->
+	
+	<!-- 2차부모 -->
+	<definition name="abstractCommonMain" extends="abstractParent" preparer="commonPreparer">
+		<put-attribute name="headerMenu" value="/WEB-INF/includee/headerMenu.jsp" />
+	</definition>
+	<!-- 2차부모 -->
+	
+	
+	<!-- 3차부모 -->
+	<!-- 프로젝트 -->
+	<definition name="abstractProject" extends="abstractCommonMain" preparer="projectPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/projectSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 프로젝트 -->
+	<!-- 커뮤니티 -->
+	<definition name="abstractBoard" extends="abstractCommonMain" preparer="boardPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/boardSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 커뮤니티 -->
+	<!-- 마이페이지 -->
+	<definition name="abstractMypage" extends="abstractCommonMain" preparer="mypagePreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/mypageSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 위키 -->
+	<definition name="abstractWiki" extends="abstractCommonMain" preparer="wikiPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/wikiSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 위키 -->
+	<!-- 서식 -->
+	<definition name="abstractForm" extends="abstractCommonMain" preparer="formPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/formSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 서식 -->
+	<!-- 오늘의 일정 -->
+	<definition name="abstractTodaylist" extends="abstractCommonMain" preparer="todaylistPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/todaylistSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 오늘의 일정 -->
+	<!-- 이슈 -->
+	<definition name="abstractTask" extends="abstractCommonMain" preparer="taskPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/taskSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 이슈 -->
+	<!-- 공지사항 -->
+	<definition name="abstractAno" extends="abstractCommonMain" preparer="anoPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/anoSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 공지사항 -->
+	<!-- 추천 -->
+	<definition name="abstractQucik" extends="abstractCommonMain" preparer="quickPreparer">
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/quickSubMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/subFooter.jsp" />
+	</definition>
+	<!-- 추천 -->
+	<definition name="abstractCommon" extends="abstractCommonMain">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/dummyMenu.jsp" />
+		<put-attribute name="subMenu" value="/WEB-INF/includee/subMenu/dummyMenu.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/dummyMenu.jsp" />
+	</definition>
+	<!-- 3차부모 -->
+	<!-- 추천 -->
+	<definition name="quick/*/*/*" extends="abstractQucik">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/quickSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/quick/{1}/{2}/{3}.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/quickSubFooter.jsp" />
+	</definition>
+	<definition name="quick/*/*" extends="abstractQucik">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/quickSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/quick/{1}/{2}.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/quickSubFooter.jsp" />
+	</definition>
+	<definition name="quick/*" extends="abstractQucik">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/quickSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/quick/{1}.jsp" />
+		<put-attribute name="subFooter" value="/WEB-INF/includee/subMenu/quickSubFooter.jsp" />
+	</definition>
+	<!-- 추천 -->
+	<!-- 공지사항 -->
+	<definition name="ano/*/*/*" extends="abstractAno">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/anoSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/ano/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="ano/*/*" extends="abstractAno">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/anoSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/ano/{1}/{2}.jsp" />
+	</definition>
+	<definition name="ano/*" extends="abstractAno">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/anoSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/ano/{1}.jsp" />
+	</definition>
+	<!-- 공지사항 -->
+	<!-- 이슈 -->
+	<definition name="task/*/*/*" extends="abstractTask">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/taskSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/task/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="task/*/*" extends="abstractTask">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/taskSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/task/{1}/{2}.jsp" />
+	</definition>
+	<definition name="task/*" extends="abstractTask">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/taskSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/task/{1}.jsp" />
+	</definition>
+	<!-- 이슈 -->
+	<!-- 서식자료 -->
+	<definition name="form/*/*/*" extends="abstractForm">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/formSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/form/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="form/*/*" extends="abstractForm">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/formSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/form/{1}/{2}.jsp" />
+	</definition>
+	<definition name="form/*" extends="abstractForm">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/formSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/form/{1}.jsp" />
+	</definition>
+	<!-- 서식자료 -->
+	<!-- 오늘의일정 -->
+	<definition name="todaylist/*/*/*" extends="abstractTodaylist">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/todaylistSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/todaylist/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="todaylist/*/*" extends="abstractTodaylist">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/todaylistSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/todaylist/{1}/{2}.jsp" />
+	</definition>
+	<definition name="todaylist/*" extends="abstractTodaylist">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/todaylistSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/todaylist/{1}.jsp" />
+	</definition>
+	<!-- 오늘의일정 -->
+	
+	<!-- 위키 -->
+	<definition name="wiki/*/*/*" extends="abstractWiki">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/wikiSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/wiki/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="wiki/*/*" extends="abstractWiki">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/wikiSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/wiki/{1}/{2}.jsp" />
+	</definition>
+	<definition name="wiki/*" extends="abstractWiki">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/wikiSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/wiki/{1}.jsp" />
+	</definition>
+	<!-- 위키 -->
+	
+	<!-- 프로젝트 -->
+	<!-- 프로젝트 관리 -->
+<!-- 	<definition name="project/manage/*" extends="abstractProject"> -->
+<!-- 		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/projectManage/projectManageSub.jsp" /> -->
+<!-- 		<put-attribute name="contentPage" value="/WEB-INF/views/project/manage/{1}.jsp" /> -->
+<!-- 	</definition> -->
+<!-- 	<definition name="project/manage/*/*" extends="abstractProject"> -->
+<!-- 		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/projectManage/projectManageSub.jsp" /> -->
+<!-- 		<put-attribute name="contentPage" value="/WEB-INF/views/project/manage/{1}/{2}.jsp" /> -->
+<!-- 	</definition> -->
+	<!-- 프로젝트 관리 -->
+	<definition name="project/*/*/*" extends="abstractProject">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/sub3/projectSub3Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/project/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="project/*/*" extends="abstractProject">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/sub3/projectSub3Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/project/{1}/{2}.jsp" />
+	</definition>
+	<definition name="project/*" extends="abstractProject">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/projectSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/project/{1}.jsp" />
+	</definition>
+	<definition name="project/projectRegister" extends="abstractProject">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/commonSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/project/projectRegister.jsp" />
+	</definition>
+	<!-- 프로젝트 -->
+	
+	<!-- 커뮤니티 -->
+	<definition name="board/*/*/*" extends="abstractBoard">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/boardSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/board/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="board/*/*" extends="abstractBoard">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/boardSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/board/{1}/{2}.jsp" />
+	</definition>
+	<definition name="board/*" extends="abstractBoard">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/boardSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/board/{1}.jsp" />
+	</definition>
+	<!-- 커뮤니티 -->
+	
+	<!-- 마이페이지 -->
+	<definition name="mypage/*/*/*" extends="abstractMypage">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/mypageSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/mypage/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="mypage/*/*" extends="abstractMypage">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/mypageSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/mypage/{1}/{2}.jsp" />
+	</definition>
+	<definition name="mypage/*" extends="abstractMypage">
+		<put-attribute name="subMenu2" value="/WEB-INF/includee/subMenu/sub2/mypageSub2Menu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/mypage/{1}.jsp" />
+	</definition>
+	<!-- 마이페이지 -->
+	
+	<!-- 채팅 -->
+	<definition name="chat/*" template="/WEB-INF/empty.jsp">
+      <put-attribute name="contentPage" value="/WEB-INF/views/chat/{1}.jsp" />
+   </definition>
+   	<definition name="chat/*/*" template="/WEB-INF/empty.jsp">
+      <put-attribute name="contentPage" value="/WEB-INF/views/chat/{1}/{2}.jsp" />
+   </definition>
+   	<definition name="chat/*/*/*" template="/WEB-INF/empty.jsp">
+      <put-attribute name="contentPage" value="/WEB-INF/views/chat/{1}/{2}/{3}.jsp" />
+   </definition>
+	<!-- 채팅 -->
+	
+	<!-- 공통 -->
+	<definition name="index" extends="abstractCommon">
+		<put-attribute name="contentPage" value="/WEB-INF/views/index.jsp" />
+	</definition>
+	<definition name="*/*" extends="abstractCommon">
+		<put-attribute name="contentPage" value="/WEB-INF/views/{1}/{2}.jsp" />
+	</definition>
+	<definition name="*/*/*" extends="abstractCommon">
+		<put-attribute name="contentPage" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+	</definition>
+	<!-- 공통 -->
+	
+</tiles-definitions>

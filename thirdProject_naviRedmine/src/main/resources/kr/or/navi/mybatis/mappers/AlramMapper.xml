@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.mypagedetail.alarm.dao.AlramDAO">
+<select id="selectAlramList" resultType="AlarmVO">
+		SELECT B.*
+				FROM(
+		    SELECT ROWNUM RNUM, A.*
+					FROM(
+		SELECT
+		    alarm_id
+		  , alarm.altype_id
+		  , al_rcvr_id
+		  , al_sndr_id
+		  , emp_name
+		  , al_rd_yn
+		  , al_reg_dt
+		  , al_move_url
+		  , al_cn
+		  , al_del_yn
+		  , altype_name
+		  , altype_cn
+		FROM
+		    alarm join alarm_type ON(alarm.altype_id=alarm_type.altype_id)
+		    join emp on(alarm.AL_SNDR_ID=emp_id)
+		where AL_RCVR_ID= #{empId}
+		and al_del_yn is null
+		order by AL_RD_YN DESC,al_reg_dt ASC
+		) A
+		        ) B
+        <where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+				<![CDATA[
+					RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+				]]>
+			</if>
+		</where>
+</select>
+<select id="selectTotalRecord">
+	WITH PROJ AS (
+		SELECT
+			    alarm_id
+			  , alarm.altype_id
+			  , al_rcvr_id
+			  , al_sndr_id
+			  , emp_name
+			  , al_rd_yn
+			  , al_reg_dt
+			  , al_move_url
+			  , al_cn
+			  , al_del_yn
+			  , altype_name
+			  , altype_cn
+			FROM
+			    alarm join alarm_type ON(alarm.altype_id=alarm_type.altype_id)
+			    join emp on(alarm.AL_SNDR_ID=emp_id)
+			where AL_RCVR_ID= #{empId}
+			and al_del_yn is null
+			order by al_reg_dt
+		)
+        SELECT COUNT(*) FROM PROJ
+</select>
+<insert id="insertAlram" parameterType="AlarmVO">
+<selectKey order="BEFORE" resultType="String" keyProperty="alarmId">
+			SELECT 
+				'A' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(alarm_id), 2)
+				            ), 0) + 1, 5, '0')
+							FROM alarm
+	</selectKey>
+	INSERT INTO alarm (
+	    alarm_id
+	    , altype_id
+	    , al_rcvr_id
+	    , al_sndr_id
+	    , al_rd_yn
+	    , al_reg_dt
+	    , al_move_url
+	    , al_cn
+	    , al_del_yn
+	) VALUES (
+	   #{alarmId}
+	  , #{altypeId}
+	  , #{alRcvrId}
+	  , #{alSndrId}
+	  , NULL
+	  , SYSTIMESTAMP
+	  , #{alMoveUrl}
+	  <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(alCn)">
+	  ,#{alCn}
+	  </if>
+	    <if test="@org.apache.commons.lang3.StringUtils@isBlank(alCn)">
+	, NULL
+	  </if>
+	
+	  , NULL
+	)
+
+</insert>
+
+	<select id="selectDisplayAlramList" resultType="AlarmVO">
+		SELECT B.*
+				FROM(
+		    SELECT ROWNUM RNUM, A.*
+					FROM(
+		SELECT
+		    alarm_id
+		  , alarm.altype_id
+		  , al_rcvr_id
+		  , al_sndr_id
+		  , emp_name
+		  , al_rd_yn
+		  , al_reg_dt
+		  , al_move_url
+		  , al_cn
+		  , al_del_yn
+		  , altype_name
+		  , altype_cn
+		FROM
+		    alarm join alarm_type ON(alarm.altype_id=alarm_type.altype_id)
+		    join emp on(alarm.AL_SNDR_ID=emp.emp_id)
+		where AL_RCVR_ID = #{empId}
+		and al_del_yn is null
+        and AL_RD_YN is null
+		order by al_reg_dt
+		) A
+		        ) B
+             <where>
+				<![CDATA[
+					RNUM >= 1 AND RNUM <= 10
+				]]>
+		</where>
+	</select>
+	<update id="updateReadAlram">
+		UPDATE alarm
+		SET
+		    al_rd_yn = 'Y'
+		WHERE
+		        alarm_id = #{alId}
+	</update>
+	<update id="updateReadAlramAll">
+	UPDATE ALARM SET al_rd_yn = 'Y' WHERE ALARM_ID IN( select ALARM_ID from alarm where AL_RCVR_ID= #{empId} AND al_rd_yn IS NULL)
+	</update>
+</mapper>

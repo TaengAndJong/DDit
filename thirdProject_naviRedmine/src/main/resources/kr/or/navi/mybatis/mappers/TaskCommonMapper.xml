@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.advice.dao.TaskCommonDAO">
+<select id="selectTaskStatusList" resultType="TaskStatusVO">
+	SELECT
+    ts_id
+  , ts_name
+  , ts_time
+FROM
+    task_status
+</select>
+
+<select id="selectTaskProcessStatusList" resultType="TaskProcessStatusVO">
+SELECT
+    tps_id
+  , tps_name
+  , tps_ing
+  , tps_desc
+FROM
+    task_process_status
+
+</select>
+</mapper>

@@ -1,0 +1,981 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.task.dao.TaskDAO">
+<!-- 일감상태TaskStatusVO / 일감진척도 TaskProcessStatusVO 는 일감과 has a 관계 -->
+<!-- 일감담당자는 일감과 Has many 관계  -->
+<!-- 프로젝트에 대한 일감조회 : 조건은 프로젝트 아이디로 지정   -->
+	
+	<resultMap type="TaskVO" id="taskMap" autoMapping="true">
+	    <id property="taskId" column="TASK_ID"/>
+	    <association property="regEmp" javaType="EmpVO">
+	    	<id property="empId" column="REG_EMP_ID" />
+	    	<result property="deptId" column="REG_DEPT_ID"/>
+	    	<result property="psId" column="REG_PS_ID"/>
+	    	<result property="empImg" column="REG_EMP_IMG"/>
+	    	<result property="empName" column="REG_EMP_NAME"/>
+	    	<result property="empAge" column="REG_EMP_AGE"/>
+	    	<result property="empGen" column="REG_EMP_GEN"/>
+	    	<result property="empPass" column="REG_EMP_PASS"/>
+	    	<result property="empRrno" column="REG_EMP_RRNO"/>
+	    	<result property="empPhone" column="REG_EMP_PHONE"/>
+	    	<result property="empTel" column="REG_EMP_TEL"/>
+	    	<result property="empZip" column="REG_EMP_ZIP"/>
+	    	<result property="empMail" column="REG_EMP_MAIL"/>
+	    	<result property="empCmpYmd" column="REG_EMP_CMP_YMD"/>
+	    	<result property="empCareer" column="REG_EMP_CAREER"/>
+	    	<result property="empQuitDt" column="REG_EMP_QUIT_DT"/>
+	    	<result property="empLimitYn" column="REG_EMP_LMIT_YN"/>
+	    	<result property="empCertCg" column="REG_EMP_CERT_CG"/>
+	    	<result property="empFmId" column="REG_EMP_REG_FM_ID"/>
+	    	<result property="empBkId" column="REG_EMP_BK_ID"/>
+	    	<result property="empAddr2" column="REG_EMP_ADDR2"/>
+	    	<result property="deptName" column="REG_DEPT_NAME"/>
+	    	<result property="psName" column="REG_PS_NAME"/>
+	    </association>
+	    <association property="taskManEmp" javaType="EmpVO">
+	    	<id property="empId" column="EMP_ID" />
+	    	<result property="deptId" column="DEPT_ID"/>
+	    	<result property="psId" column="PS_ID"/>
+	    	<result property="empImg" column="EMP_IMG"/>
+	    	<result property="empName" column="EMP_NAME"/>
+	    	<result property="empAge" column="EMP_AGE"/>
+	    	<result property="empGen" column="EMP_GEN"/>
+	    	<result property="empPass" column="EMP_PASS"/>
+	    	<result property="empRrno" column="EMP_RRNO"/>
+	    	<result property="empPhone" column="EMP_PHONE"/>
+	    	<result property="empTel" column="EMP_TEL"/>
+	    	<result property="empZip" column="EMP_ZIP"/>
+	    	<result property="empMail" column="EMP_MAIL"/>
+	    	<result property="empCmpYmd" column="EMP_CMP_YMD"/>
+	    	<result property="empCareer" column="EMP_CAREER"/>
+	    	<result property="empQuitDt" column="EMP_QUIT_DT"/>
+	    	<result property="empLimitYn" column="EMP_LMIT_YN"/>
+	    	<result property="empCertCg" column="EMP_CERT_CG"/>
+	    	<result property="empFmId" column="EMP_REG_FM_ID"/>
+	    	<result property="empBkId" column="EMP_BK_ID"/>
+	    	<result property="empAddr2" column="EMP_ADDR2"/>
+	    	<result property="deptName" column="DEPT_NAME"/>
+	    	<result property="psName" column="PS_NAME"/>
+	    </association>
+	    <!-- project 변수의 매핑 -->
+	    <association property="projectVO" javaType="ProjectVO" autoMapping="true">
+	    	<id property="proId" column="PRO_ID"/>
+	    </association>
+	    <!-- project 변수의 매핑 -->
+	    <!-- taskStatusVO mapping : -->
+	    <association property="taskStatus" javaType="TaskStatusVO" autoMapping="true">
+			<id property="tsId" column="TS_ID"/>
+		</association>
+	    <!-- task status 변수의 매핑 -->
+	    <!-- taskProcessStatus -->
+	     <association property="taskProcessStatus" javaType="TaskProcessStatusVO" autoMapping="true">
+			<id property="tpsId" column="TPS_ID"/>
+		</association>
+	    <!-- taskProcessStatus -->
+	</resultMap>
+	
+	<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.ts)">
+					 TASK.ts_id = #{detailCondition.ts} AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.tps)">
+					TASK.tps_id = #{detailCondition.tps} AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.word)">
+					(INSTR(task_title, #{detailCondition.word}) > 0 
+					OR
+					INSTR(man.emp_name, #{detailCondition.word}) > 0 
+					OR
+					INSTR(project.pro_name, #{detailCondition.word}) > 0 )
+				</if>
+			</if>
+		</trim>
+	</sql>
+	<sql id="searchFrag1">
+		<trim suffixOverrides="AND">
+			<if test="not paging.detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.ts)">
+					 TASK.ts_id = #{paging.detailCondition.ts} AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.tps)">
+					TASK.tps_id = #{paging.detailCondition.tps} AND 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.detailCondition.word)">
+					(INSTR(task_title, #{paging.detailCondition.word}) > 0 
+					OR
+					INSTR(man.emp_name, #{paging.detailCondition.word}) > 0 
+					OR
+					INSTR(project.pro_name, #{paging.detailCondition.word}) > 0 )
+				</if>
+			</if>
+		</trim>
+	</sql>
+	
+	
+	<select id="selectProjectList" resultMap="taskMap">
+	SELECT B.* FROM(
+		SELECT ROWNUM RNUM,A.* FROM(
+			           SELECT
+			    task_id
+			  , TASK.ts_id
+			  , task.pro_id
+			  , task_man_id
+			  , task_top_id
+			  , TASK.tps_id
+			  , task_reg_id
+			  , task_title
+			  , task_reg_dt
+			  , task_ddline_dt
+			  , task_mod_dt
+			  , task_cn
+			  , task_rqrd
+			  , task_est_time
+			  , task_comp_dt
+			  , task_del_dt
+			  , pro_st_id
+			  , pro_name
+			  , pro_desc
+			  , pro_reg_dt
+			  , pro_ddline_ex
+			  , pro_ddline_dt
+			  , pro_ddline_yn
+			  , pro_del_yn
+			  , MAN.emp_id
+			  , MAN.dept_id
+			  , MAN.ps_id
+			  , MAN.emp_img
+			  , MAN.emp_name
+			  , MAN.emp_age
+			  , MAN.emp_gen
+			  , MAN.emp_pass
+			  , MAN.emp_rrno
+			  , MAN.emp_phone
+			  , MAN.emp_tel
+			  , MAN.emp_zip
+			  , MAN.emp_addr
+			  , MAN.emp_mail
+			  , MAN.emp_cmp_ymd
+			  , MAN.emp_career
+			  , MAN.emp_quit_dt
+			  , MAN.emp_limit_yn
+			  , MAN.emp_cert_cg
+			  , MAN.emp_fm_id
+			  , MAN.emp_bk_id
+			  , MAN.emp_addr2
+              
+              
+              , REG.emp_id AS REG_EMP_ID
+			  , REG.dept_id AS REG_DEPT_ID
+			  , REG.ps_id AS REG_PS_ID
+			  , REG.emp_img AS REG_EMP_IMG
+			  , REG.emp_name AS REG_EMP_NAME
+			  , REG.emp_age AS REG_EMP_AGE
+			  , REG.emp_gen AS REG_EMP_GEN
+			  , REG.emp_pass AS REG_EMP_PASS
+			  , REG.emp_rrno AS REG_EMP_RRNO
+			  , REG.emp_phone AS  REG_EMP_PHONE
+			  , REG.emp_tel AS REG_EMP_TEL
+			  , REG.emp_zip AS REG_EMP_ZIP
+			  , REG.emp_addr AS REG_EMP_ADDR
+			  , REG.emp_mail AS REG_EMP_MAIL
+			  , REG.emp_cmp_ymd AS REG_EMP_CMP_YMD
+			  , REG.emp_career AS REG_EMP_CAREER
+			  , REG.emp_quit_dt AS REG_EMP_QUIT_DT
+			  , REG.emp_limit_yn AS REG_EMP_LMIT_YN
+			  , REG.emp_cert_cg AS REG_EMP_CERT_CG
+			  , REG.emp_fm_id AS REG_EMP_REG_FM_ID
+			  , REG.emp_bk_id AS REG_EMP_BK_ID
+			  , REG.emp_addr2 AS REG_EMP_ADDR2
+			  , ts_name
+			  , ts_time
+			  , MAN_DEPT.DEPT_NAME 
+			  , MAN_POSITION.PS_NAME 
+              , REG_DEPT.DEPT_NAME AS REG_DEPT_NAME
+              , REG_POSITION.PS_NAME AS REG_PS_NAME
+              , tps_name
+              , tps_ing
+              , tps_desc
+			FROM
+			    task 
+			JOIN 
+			    PROJECT ON(TASK.PRO_ID=PROJECT.PRO_ID)
+			JOIN 
+			    EMP MAN ON(TASK.TASK_MAN_ID=MAN.EMP_ID)
+			JOIN 
+			    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+			JOIN 
+			    DEPT MAN_DEPT ON(MAN.DEPT_ID=MAN_DEPT.DEPT_ID)
+			JOIN 
+                POSITION MAN_POSITION ON(MAN.PS_ID=MAN_POSITION.PS_ID)
+            JOIN 
+                task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+            JOIN 
+                EMP REG ON(TASK.TASK_REG_ID=REG.EMP_ID)
+            JOIN 
+                DEPT REG_DEPT ON(REG.DEPT_ID=REG_DEPT.DEPT_ID)
+            JOIN
+                POSITION REG_POSITION ON(REG.PS_ID=REG_POSITION.PS_ID)
+            WHERE 
+          	TASK.PRO_ID = #{proId}
+            AND task_del_dt IS NULL
+            <include refid="searchFrag1" />
+            ORDER BY task_reg_dt DESC
+			)A
+		)B
+		<where>
+			<if test="paging.startRow gt 0 and paging.endRow gt 0">
+				<![CDATA[
+					RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	<!-- 전체조회 -->
+	<select id="selectList" resultMap="taskMap" parameterType="PaginationInfo">
+	SELECT B.* FROM(
+		SELECT ROWNUM RNUM,A.* FROM(
+			           SELECT
+			    task_id
+			  , TASK.ts_id
+			  , task.pro_id
+			  , task_man_id
+			  , task_top_id
+			  , TASK.tps_id
+			  , task_reg_id
+			  , task_title
+			  , task_reg_dt
+			  , task_ddline_dt
+			  , task_mod_dt
+			  , task_cn
+			  , task_rqrd
+			  , task_est_time
+			  , task_comp_dt
+			  , task_del_dt
+			  , pro_st_id
+			  , pro_name
+			  , pro_desc
+			  , pro_reg_dt
+			  , pro_ddline_ex
+			  , pro_ddline_dt
+			  , pro_ddline_yn
+			  , pro_del_yn
+			  , MAN.emp_id
+			  , MAN.dept_id
+			  , MAN.ps_id
+			  , MAN.emp_img
+			  , MAN.emp_name
+			  , MAN.emp_age
+			  , MAN.emp_gen
+			  , MAN.emp_pass
+			  , MAN.emp_rrno
+			  , MAN.emp_phone
+			  , MAN.emp_tel
+			  , MAN.emp_zip
+			  , MAN.emp_addr
+			  , MAN.emp_mail
+			  , MAN.emp_cmp_ymd
+			  , MAN.emp_career
+			  , MAN.emp_quit_dt
+			  , MAN.emp_limit_yn
+			  , MAN.emp_cert_cg
+			  , MAN.emp_fm_id
+			  , MAN.emp_bk_id
+			  , MAN.emp_addr2
+              
+              
+              , REG.emp_id AS REG_EMP_ID
+			  , REG.dept_id AS REG_DEPT_ID
+			  , REG.ps_id AS REG_PS_ID
+			  , REG.emp_img AS REG_EMP_IMG
+			  , REG.emp_name AS REG_EMP_NAME
+			  , REG.emp_age AS REG_EMP_AGE
+			  , REG.emp_gen AS REG_EMP_GEN
+			  , REG.emp_pass AS REG_EMP_PASS
+			  , REG.emp_rrno AS REG_EMP_RRNO
+			  , REG.emp_phone AS  REG_EMP_PHONE
+			  , REG.emp_tel AS REG_EMP_TEL
+			  , REG.emp_zip AS REG_EMP_ZIP
+			  , REG.emp_addr AS REG_EMP_ADDR
+			  , REG.emp_mail AS REG_EMP_MAIL
+			  , REG.emp_cmp_ymd AS REG_EMP_CMP_YMD
+			  , REG.emp_career AS REG_EMP_CAREER
+			  , REG.emp_quit_dt AS REG_EMP_QUIT_DT
+			  , REG.emp_limit_yn AS REG_EMP_LMIT_YN
+			  , REG.emp_cert_cg AS REG_EMP_CERT_CG
+			  , REG.emp_fm_id AS REG_EMP_REG_FM_ID
+			  , REG.emp_bk_id AS REG_EMP_BK_ID
+			  , REG.emp_addr2 AS REG_EMP_ADDR2
+			  , ts_name
+			  , ts_time
+			  , MAN_DEPT.DEPT_NAME 
+			  , MAN_POSITION.PS_NAME 
+              , REG_DEPT.DEPT_NAME AS REG_DEPT_NAME
+              , REG_POSITION.PS_NAME AS REG_PS_NAME
+              , tps_name
+              , tps_ing
+              , tps_desc
+			FROM
+			    task 
+			JOIN 
+			    PROJECT ON(TASK.PRO_ID=PROJECT.PRO_ID)
+			JOIN 
+			    EMP MAN ON(TASK.TASK_MAN_ID=MAN.EMP_ID)
+			JOIN 
+			    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+			JOIN 
+			    DEPT MAN_DEPT ON(MAN.DEPT_ID=MAN_DEPT.DEPT_ID)
+			JOIN 
+                POSITION MAN_POSITION ON(MAN.PS_ID=MAN_POSITION.PS_ID)
+            JOIN 
+                task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+            JOIN 
+                EMP REG ON(TASK.TASK_REG_ID=REG.EMP_ID)
+            JOIN 
+                DEPT REG_DEPT ON(REG.DEPT_ID=REG_DEPT.DEPT_ID)
+            JOIN
+                POSITION REG_POSITION ON(REG.PS_ID=REG_POSITION.PS_ID)
+            WHERE 
+            1=1
+            AND task_del_dt IS NULL
+            <include refid="searchFrag" />
+            ORDER BY task_reg_dt DESC
+			)A
+		)B
+		<where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+	<!--전체조회  -->
+	<select id="selectProjectTotalRecord">
+	select count(*) from
+		(           SELECT
+			    task_id
+			  , TASK.ts_id
+			  , task.pro_id
+			  , task_man_id
+			  , task_top_id
+			  , TASK.tps_id
+			  , task_reg_id
+			  , task_title
+			  , task_reg_dt
+			  , task_ddline_dt
+			  , task_mod_dt
+			  , task_cn
+			  , task_rqrd
+			  , task_est_time
+			  , task_comp_dt
+			  , task_del_dt
+			  , pro_st_id
+			  , pro_name
+			  , pro_desc
+			  , pro_reg_dt
+			  , pro_ddline_ex
+			  , pro_ddline_dt
+			  , pro_ddline_yn
+			  , pro_del_yn
+			  , MAN.emp_id
+			  , MAN.dept_id
+			  , MAN.ps_id
+			  , MAN.emp_img
+			  , MAN.emp_name
+			  , MAN.emp_age
+			  , MAN.emp_gen
+			  , MAN.emp_pass
+			  , MAN.emp_rrno
+			  , MAN.emp_phone
+			  , MAN.emp_tel
+			  , MAN.emp_zip
+			  , MAN.emp_addr
+			  , MAN.emp_mail
+			  , MAN.emp_cmp_ymd
+			  , MAN.emp_career
+			  , MAN.emp_quit_dt
+			  , MAN.emp_limit_yn
+			  , MAN.emp_cert_cg
+			  , MAN.emp_fm_id
+			  , MAN.emp_bk_id
+			  , MAN.emp_addr2
+              
+              
+              , REG.emp_id AS REG_EMP_ID
+			  , REG.dept_id AS REG_DEPT_ID
+			  , REG.ps_id AS REG_PS_ID
+			  , REG.emp_img AS REG_EMP_IMG
+			  , REG.emp_name AS REG_EMP_NAME
+			  , REG.emp_age AS REG_EMP_AGE
+			  , REG.emp_gen AS REG_EMP_GEN
+			  , REG.emp_pass AS REG_EMP_PASS
+			  , REG.emp_rrno AS REG_EMP_RRNO
+			  , REG.emp_phone AS  REG_EMP_PHONE
+			  , REG.emp_tel AS REG_EMP_TEL
+			  , REG.emp_zip AS REG_EMP_ZIP
+			  , REG.emp_addr AS REG_EMP_ADDR
+			  , REG.emp_mail AS REG_EMP_MAIL
+			  , REG.emp_cmp_ymd AS REG_EMP_CMP_YMD
+			  , REG.emp_career AS REG_EMP_CAREER
+			  , REG.emp_quit_dt AS REG_EMP_QUIT_DT
+			  , REG.emp_limit_yn AS REG_EMP_LMIT_YN
+			  , REG.emp_cert_cg AS REG_EMP_CERT_CG
+			  , REG.emp_fm_id AS REG_EMP_REG_FM_ID
+			  , REG.emp_bk_id AS REG_EMP_BK_ID
+			  , REG.emp_addr2 AS REG_EMP_ADDR2
+			  , ts_name
+			  , ts_time
+			  , MAN_DEPT.DEPT_NAME 
+			  , MAN_POSITION.PS_NAME 
+              , REG_DEPT.DEPT_NAME AS REG_DEPT_NAME
+              , REG_POSITION.PS_NAME AS REG_PS_NAME
+              , tps_name
+              , tps_ing
+              , tps_desc
+			FROM
+			    task 
+			JOIN 
+			    PROJECT ON(TASK.PRO_ID=PROJECT.PRO_ID)
+			JOIN 
+			    EMP MAN ON(TASK.TASK_MAN_ID=MAN.EMP_ID)
+			JOIN 
+			    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+			JOIN 
+			    DEPT MAN_DEPT ON(MAN.DEPT_ID=MAN_DEPT.DEPT_ID)
+			JOIN 
+                POSITION MAN_POSITION ON(MAN.PS_ID=MAN_POSITION.PS_ID)
+            JOIN 
+                task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+            JOIN 
+                EMP REG ON(TASK.TASK_REG_ID=REG.EMP_ID)
+            JOIN 
+                DEPT REG_DEPT ON(REG.DEPT_ID=REG_DEPT.DEPT_ID)
+            JOIN
+                POSITION REG_POSITION ON(REG.PS_ID=REG_POSITION.PS_ID)
+            WHERE 
+            TASK.PRO_ID = #{proId}
+            AND task_del_dt IS NULL
+            <include refid="searchFrag1" />
+            ORDER BY task_reg_dt DESC
+             )
+	</select>
+	<!-- 총 레코드  -->
+	<select id="selectTotalRecord">
+    select count(*) from
+		(           SELECT
+			    task_id
+			  , TASK.ts_id
+			  , task.pro_id
+			  , task_man_id
+			  , task_top_id
+			  , TASK.tps_id
+			  , task_reg_id
+			  , task_title
+			  , task_reg_dt
+			  , task_ddline_dt
+			  , task_mod_dt
+			  , task_cn
+			  , task_rqrd
+			  , task_est_time
+			  , task_comp_dt
+			  , task_del_dt
+			  , pro_st_id
+			  , pro_name
+			  , pro_desc
+			  , pro_reg_dt
+			  , pro_ddline_ex
+			  , pro_ddline_dt
+			  , pro_ddline_yn
+			  , pro_del_yn
+			  , MAN.emp_id
+			  , MAN.dept_id
+			  , MAN.ps_id
+			  , MAN.emp_img
+			  , MAN.emp_name
+			  , MAN.emp_age
+			  , MAN.emp_gen
+			  , MAN.emp_pass
+			  , MAN.emp_rrno
+			  , MAN.emp_phone
+			  , MAN.emp_tel
+			  , MAN.emp_zip
+			  , MAN.emp_addr
+			  , MAN.emp_mail
+			  , MAN.emp_cmp_ymd
+			  , MAN.emp_career
+			  , MAN.emp_quit_dt
+			  , MAN.emp_limit_yn
+			  , MAN.emp_cert_cg
+			  , MAN.emp_fm_id
+			  , MAN.emp_bk_id
+			  , MAN.emp_addr2
+              
+              
+              , REG.emp_id AS REG_EMP_ID
+			  , REG.dept_id AS REG_DEPT_ID
+			  , REG.ps_id AS REG_PS_ID
+			  , REG.emp_img AS REG_EMP_IMG
+			  , REG.emp_name AS REG_EMP_NAME
+			  , REG.emp_age AS REG_EMP_AGE
+			  , REG.emp_gen AS REG_EMP_GEN
+			  , REG.emp_pass AS REG_EMP_PASS
+			  , REG.emp_rrno AS REG_EMP_RRNO
+			  , REG.emp_phone AS  REG_EMP_PHONE
+			  , REG.emp_tel AS REG_EMP_TEL
+			  , REG.emp_zip AS REG_EMP_ZIP
+			  , REG.emp_addr AS REG_EMP_ADDR
+			  , REG.emp_mail AS REG_EMP_MAIL
+			  , REG.emp_cmp_ymd AS REG_EMP_CMP_YMD
+			  , REG.emp_career AS REG_EMP_CAREER
+			  , REG.emp_quit_dt AS REG_EMP_QUIT_DT
+			  , REG.emp_limit_yn AS REG_EMP_LMIT_YN
+			  , REG.emp_cert_cg AS REG_EMP_CERT_CG
+			  , REG.emp_fm_id AS REG_EMP_REG_FM_ID
+			  , REG.emp_bk_id AS REG_EMP_BK_ID
+			  , REG.emp_addr2 AS REG_EMP_ADDR2
+			  , ts_name
+			  , ts_time
+			  , MAN_DEPT.DEPT_NAME 
+			  , MAN_POSITION.PS_NAME 
+              , REG_DEPT.DEPT_NAME AS REG_DEPT_NAME
+              , REG_POSITION.PS_NAME AS REG_PS_NAME
+              , tps_name
+              , tps_ing
+              , tps_desc
+			FROM
+			    task 
+			JOIN 
+			    PROJECT ON(TASK.PRO_ID=PROJECT.PRO_ID)
+			JOIN 
+			    EMP MAN ON(TASK.TASK_MAN_ID=MAN.EMP_ID)
+			JOIN 
+			    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+			JOIN 
+			    DEPT MAN_DEPT ON(MAN.DEPT_ID=MAN_DEPT.DEPT_ID)
+			JOIN 
+                POSITION MAN_POSITION ON(MAN.PS_ID=MAN_POSITION.PS_ID)
+            JOIN 
+                task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+            JOIN 
+                EMP REG ON(TASK.TASK_REG_ID=REG.EMP_ID)
+            JOIN 
+                DEPT REG_DEPT ON(REG.DEPT_ID=REG_DEPT.DEPT_ID)
+            JOIN
+                POSITION REG_POSITION ON(REG.PS_ID=REG_POSITION.PS_ID)
+            WHERE 
+            1=1
+            AND task_del_dt IS NULL
+            <include refid="searchFrag" />
+            ORDER BY task_reg_dt DESC
+             )
+	</select>
+<select id="select" resultMap="taskMap">
+                        SELECT
+			    task_id
+			  , TASK.ts_id
+			  , task.pro_id
+			  , task_man_id
+			  , task_top_id
+			  , TASK.tps_id
+			  , task_reg_id
+			  , task_title
+			  , task_reg_dt
+			  , task_ddline_dt
+			  , task_mod_dt
+			  , task_cn
+			  , task_rqrd
+			  , task_est_time
+			  , task_comp_dt
+			  , task_del_dt
+			  , pro_st_id
+			  , pro_name
+			  , pro_desc
+			  , pro_reg_dt
+			  , pro_ddline_ex
+			  , pro_ddline_dt
+			  , pro_ddline_yn
+			  , pro_del_yn
+			  , MAN.emp_id
+			  , MAN.dept_id
+			  , MAN.ps_id
+			  , MAN.emp_img
+			  , MAN.emp_name
+			  , MAN.emp_age
+			  , MAN.emp_gen
+			  , MAN.emp_pass
+			  , MAN.emp_rrno
+			  , MAN.emp_phone
+			  , MAN.emp_tel
+			  , MAN.emp_zip
+			  , MAN.emp_addr
+			  , MAN.emp_mail
+			  , MAN.emp_cmp_ymd
+			  , MAN.emp_career
+			  , MAN.emp_quit_dt
+			  , MAN.emp_limit_yn
+			  , MAN.emp_cert_cg
+			  , MAN.emp_fm_id
+			  , MAN.emp_bk_id
+			  , MAN.emp_addr2
+              , REG.emp_id AS REG_EMP_ID
+			  , REG.dept_id AS REG_DEPT_ID
+			  , REG.ps_id AS REG_PS_ID
+			  , REG.emp_img AS REG_EMP_IMG
+			  , REG.emp_name AS REG_EMP_NAME
+			  , REG.emp_age AS REG_EMP_AGE
+			  , REG.emp_gen AS REG_EMP_GEN
+			  , REG.emp_pass AS REG_EMP_PASS
+			  , REG.emp_rrno AS REG_EMP_RRNO
+			  , REG.emp_phone AS  REG_EMP_PHONE
+			  , REG.emp_tel AS REG_EMP_TEL
+			  , REG.emp_zip AS REG_EMP_ZIP
+			  , REG.emp_addr AS REG_EMP_ADDR
+			  , REG.emp_mail AS REG_EMP_MAIL
+			  , REG.emp_cmp_ymd AS REG_EMP_CMP_YMD
+			  , REG.emp_career AS REG_EMP_CAREER
+			  , REG.emp_quit_dt AS REG_EMP_QUIT_DT
+			  , REG.emp_limit_yn AS REG_EMP_LMIT_YN
+			  , REG.emp_cert_cg AS REG_EMP_CERT_CG
+			  , REG.emp_fm_id AS REG_EMP_REG_FM_ID
+			  , REG.emp_bk_id AS REG_EMP_BK_ID
+			  , REG.emp_addr2 AS REG_EMP_ADDR2
+			  , ts_name
+			  , ts_time
+			  , MAN_DEPT.DEPT_NAME 
+			  , MAN_POSITION.PS_NAME 
+              , REG_DEPT.DEPT_NAME AS REG_DEPT_NAME
+              , REG_POSITION.PS_NAME AS REG_PS_NAME
+              , tps_name
+              , tps_ing
+              , tps_desc
+			FROM
+			    task 
+			JOIN 
+			    PROJECT ON(TASK.PRO_ID=PROJECT.PRO_ID)
+			JOIN 
+			    EMP MAN ON(TASK.TASK_MAN_ID=MAN.EMP_ID)
+			JOIN 
+			    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+			JOIN 
+			    DEPT MAN_DEPT ON(MAN.DEPT_ID=MAN_DEPT.DEPT_ID)
+			JOIN 
+                POSITION MAN_POSITION ON(MAN.PS_ID=MAN_POSITION.PS_ID)
+            JOIN 
+                task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+            JOIN 
+                EMP REG ON(TASK.TASK_REG_ID=REG.EMP_ID)
+            JOIN 
+                DEPT REG_DEPT ON(REG.DEPT_ID=REG_DEPT.DEPT_ID)
+            JOIN
+                POSITION REG_POSITION ON(REG.PS_ID=REG_POSITION.PS_ID)
+            WHERE 
+            TASK_ID= #{taskId}
+
+</select>
+<delete id="deleteTask">
+	UPDATE task
+	SET
+	    task_del_dt = SYSTIMESTAMP
+	WHERE
+        task_id = #{taskId}
+</delete>
+<resultMap type="TeamVO" id="teamMap" autoMapping="true">
+	<id property="empId" column="TEAM_EMP_ID" />
+	<id property="proId" column="PRO_ID" />
+	<result property="roleId" column="TEAM_ROLE_ID"/>
+	<association property="emp" javaType="EmpVO" autoMapping="true">
+		<id property="empId" column="EMP_EMP_ID"/>
+		<result property="roleId" column="ROLE_ID"/>
+	</association>
+</resultMap>
+	<select id="selectTeamList" resultMap="teamMap">
+		SELECT
+		    pro_id
+		  , team.emp_id as team_emp_id
+		  , team.role_id as team_ROLE_ID
+		  , team_yn
+		  , emp.emp_id as emp_emp_id
+		  , emp.dept_id
+		  , dept.dept_name
+		  , position.ps_name
+		  , emp.ps_id
+		  , emp.role_id
+		  , cn_id
+		  , emp_img
+		  , emp_name
+		  , emp_age
+		  , emp_gen
+		  , emp_pass
+		  , emp_rrno
+		  , emp_phone
+		  , emp_tel
+		  , emp_zip
+		  , emp_addr
+		  , emp_mail
+		  , emp_cmp_ymd
+		  , emp_career
+		  , emp_quit_dt
+		  , emp_limit_yn
+		  , emp_cert_cg
+		  , emp_fm_id
+		  , emp_bk_id
+		  , emp_addr2
+		FROM
+		    team 
+		join 
+		    emp on(team.emp_id=emp.emp_id)
+		join
+		    dept on(emp.dept_id=dept.dept_id)
+		join
+		    position on(emp.ps_id=position.ps_id)
+		WHERE
+			pro_id=#{proId}
+		   
+	</select>
+	<update id="updateTask" parameterType="TaskVO">
+	UPDATE task
+	SET
+	    ts_id =  #{tsId},
+	    task_est_time = #{taskEstTime} ,
+	    tps_id = #{tpsId},
+	    task_man_id =  #{taskManId} ,
+	    task_comp_dt =  #{taskCompDt},
+	    task_title = #{taskTitle},
+	    task_cn = #{taskCn , jdbcType=CLOB},
+	    task_mod_dt = SYSTIMESTAMP
+	WHERE
+	        task_id = #{taskId}
+	</update>
+	<!-- 총 레코드  -->
+	<insert id="insertTask" parameterType="TaskVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="taskId">
+<!-- 			select  -->
+<!-- 		    'T'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(TASK_ID),5)),0)+1,5,'0')  -->
+<!-- 		    FROM TASK -->
+		    		SELECT 
+				'T' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(MAX(TASK_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM TASK
+		</selectKey>
+		INSERT INTO task (
+		    task_id
+		    , ts_id
+		    , pro_id
+		    , task_man_id
+		    , task_top_id
+		    , tps_id
+		    , task_reg_id
+		    , task_title
+		    , task_reg_dt
+		    , task_ddline_dt
+		    , task_mod_dt
+		    , task_cn
+		    , task_rqrd
+		    , task_est_time
+		    , task_comp_dt
+		    , task_del_dt
+		) VALUES (
+		    #{taskId}
+		  , #{tsId}
+		  , #{proId}
+		  , #{taskManId}
+		  <if test="taskTopId != null">
+		  , #{taskTopId}
+		  </if>
+		  <if test="taskTopId == null">
+		  , NULL
+		  </if>
+		  , #{tpsId}
+		  , #{taskRegId}
+		  , #{taskTitle}
+		  , SYSTIMESTAMP
+		  , NULL
+		  , NULL
+		  , #{taskCn,jdbcType=CLOB}
+		  , NULL
+		  , #{taskEstTime}
+		  , #{taskCompDt}
+		  , NULL
+		)
+	</insert>
+	<select id="selectChildTaskList"  resultMap="taskMap">
+	           SELECT
+			    task_id
+			  , TASK.ts_id
+			  , task.pro_id
+			  , task_man_id
+			  , task_top_id
+			  , TASK.tps_id
+			  , task_reg_id
+			  , task_title
+			  , task_reg_dt
+			  , task_ddline_dt
+			  , task_mod_dt
+			  , task_cn
+			  , task_rqrd
+			  , task_est_time
+			  , task_comp_dt
+			  , task_del_dt
+			  , pro_st_id
+			  , pro_name
+			  , pro_desc
+			  , pro_reg_dt
+			  , pro_ddline_ex
+			  , pro_ddline_dt
+			  , pro_ddline_yn
+			  , pro_del_yn
+			  , MAN.emp_id
+			  , MAN.dept_id
+			  , MAN.ps_id
+			  , MAN.emp_img
+			  , MAN.emp_name
+			  , MAN.emp_age
+			  , MAN.emp_gen
+			  , MAN.emp_pass
+			  , MAN.emp_rrno
+			  , MAN.emp_phone
+			  , MAN.emp_tel
+			  , MAN.emp_zip
+			  , MAN.emp_addr
+			  , MAN.emp_mail
+			  , MAN.emp_cmp_ymd
+			  , MAN.emp_career
+			  , MAN.emp_quit_dt
+			  , MAN.emp_limit_yn
+			  , MAN.emp_cert_cg
+			  , MAN.emp_fm_id
+			  , MAN.emp_bk_id
+			  , MAN.emp_addr2
+              , REG.emp_id AS REG_EMP_ID
+			  , REG.dept_id AS REG_DEPT_ID
+			  , REG.ps_id AS REG_PS_ID
+			  , REG.emp_img AS REG_EMP_IMG
+			  , REG.emp_name AS REG_EMP_NAME
+			  , REG.emp_age AS REG_EMP_AGE
+			  , REG.emp_gen AS REG_EMP_GEN
+			  , REG.emp_pass AS REG_EMP_PASS
+			  , REG.emp_rrno AS REG_EMP_RRNO
+			  , REG.emp_phone AS  REG_EMP_PHONE
+			  , REG.emp_tel AS REG_EMP_TEL
+			  , REG.emp_zip AS REG_EMP_ZIP
+			  , REG.emp_addr AS REG_EMP_ADDR
+			  , REG.emp_mail AS REG_EMP_MAIL
+			  , REG.emp_cmp_ymd AS REG_EMP_CMP_YMD
+			  , REG.emp_career AS REG_EMP_CAREER
+			  , REG.emp_quit_dt AS REG_EMP_QUIT_DT
+			  , REG.emp_limit_yn AS REG_EMP_LMIT_YN
+			  , REG.emp_cert_cg AS REG_EMP_CERT_CG
+			  , REG.emp_fm_id AS REG_EMP_REG_FM_ID
+			  , REG.emp_bk_id AS REG_EMP_BK_ID
+			  , REG.emp_addr2 AS REG_EMP_ADDR2
+			  , ts_name
+			  , ts_time
+			  , MAN_DEPT.DEPT_NAME 
+			  , MAN_POSITION.PS_NAME 
+              , REG_DEPT.DEPT_NAME AS REG_DEPT_NAME
+              , REG_POSITION.PS_NAME AS REG_PS_NAME
+              , tps_name
+              , tps_ing
+              , tps_desc
+			FROM
+			    task 
+			JOIN 
+			    PROJECT ON(TASK.PRO_ID=PROJECT.PRO_ID)
+			JOIN 
+			    EMP MAN ON(TASK.TASK_MAN_ID=MAN.EMP_ID)
+			JOIN 
+			    task_status ON(TASK.TS_ID=TASK_STATUS.TS_ID)
+			JOIN 
+			    DEPT MAN_DEPT ON(MAN.DEPT_ID=MAN_DEPT.DEPT_ID)
+			JOIN 
+                POSITION MAN_POSITION ON(MAN.PS_ID=MAN_POSITION.PS_ID)
+            JOIN 
+                task_process_status ON(TASK.TPS_ID=task_process_status.TPS_ID)
+            JOIN 
+                EMP REG ON(TASK.TASK_REG_ID=REG.EMP_ID)
+            JOIN 
+                DEPT REG_DEPT ON(REG.DEPT_ID=REG_DEPT.DEPT_ID)
+            JOIN
+                POSITION REG_POSITION ON(REG.PS_ID=REG_POSITION.PS_ID)
+            WHERE 
+            task_top_id= #{taskId}
+	
+	</select>
+	
+	<insert id="insertFile" parameterType="TaskFileVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="tfId">
+			SELECT 
+				'T' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(tf_id), 2)
+				            ), 0) + 1, 5, '0')
+							FROM task_file
+	</selectKey>
+	INSERT INTO task_file (
+	    tf_id
+	    , task_id
+	    , emp_id
+	    , tf_attch_file
+	    , tf_org_nm
+	    , tf_gb_id
+	    , task_uuid_name
+	    , task_file_size
+	) VALUES (
+	    #{tfId}
+	  , #{taskId}
+	  , NULL
+	  , NULL
+	  , #{tfOrgNm}
+	  , #{tfGbId}
+	  , #{taskUuidName}
+	  , #{taskFileSize}
+	)
+	
+	</insert>
+	
+	<select id="selectTaskFileList">
+	SELECT
+	    tf_id
+	  , task_id
+	  , emp_id
+	  , tf_attch_file
+	  , tf_org_nm
+	  , tf_gb_id
+	  , task_uuid_name
+	  , task_file_size
+	FROM
+	    task_file
+	WHERE
+		task_id= #{taskId}
+	</select>
+	<select id="selectTaskFile" resultType="TaskFileVO">
+	SELECT
+	    tf_id
+	  , task_id
+	  , emp_id
+	  , tf_attch_file
+	  , tf_org_nm
+	  , tf_gb_id
+	  , task_uuid_name
+	  , task_file_size
+	FROM
+	    task_file
+	WHERE
+		tf_id = #{tfId}
+	</select>
+	<delete id="deleteTaksFile">
+	DELETE FROM task_file WHERE
+		tf_id = #{tfId}
+	</delete>
+</mapper>

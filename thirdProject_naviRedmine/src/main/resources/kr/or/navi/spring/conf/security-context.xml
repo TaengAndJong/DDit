@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+   xmlns="http://www.springframework.org/schema/security"
+   xmlns:beans="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:c="http://www.springframework.org/schema/c"
+   xmlns:p="http://www.springframework.org/schema/p"
+   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.7.xsd">
+   <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>
+      <authentication-manager>
+         <!-- db정보 생성 -->
+<!--          <authentication-provider> -->
+         <authentication-provider user-service-ref="userDetailService">
+            <password-encoder ref="passwordEncoder"/>
+         </authentication-provider>
+      </authentication-manager>
+      <beans:bean id="cookieCsrfTokenRepository" class="org.springframework.security.web.csrf.CookieCsrfTokenRepository"
+         p:cookieHttpOnly="true"
+      />
+      <beans:bean id="authenticationSuccessHandler" 
+      class="kr.or.navi.security.handler.CustomAthenticationSuccessHandler"
+      p:defaultTargetUrl="/"
+      p:alwaysUseDefaultTargetUrl="true"
+      />
+      <beans:bean id="LogoutSuccessHandler" class="kr.or.navi.security.handler.CustomLogoutSuccessHandler"/>
+      <http pattern="/resources/**" security="none"/>
+      <http auto-config="true">
+<!--             default-target-url="/" -->
+<!--             always-use-default-target="false"       -->
+         <form-login 
+            login-page="/myLogin" 
+            login-processing-url="/myLogin" 
+            authentication-success-handler-ref="authenticationSuccessHandler"
+         />
+<!--             logout-success-url="/"  -->
+         <logout 
+            logout-url="/logout" 
+            invalidate-session="false"
+            success-handler-ref="LogoutSuccessHandler"
+            />
+      <!-- permitAll 전체 O -->
+      <!-- denyAll 전체 x -->
+      <!-- savedRequest 이전 요청했던 페이지로 자동 이동-->
+         <csrf disabled="false" 
+         token-repository-ref="cookieCsrfTokenRepository"
+         />
+         
+         <intercept-url pattern="/myLogin" access="permitAll"/>
+         <intercept-url pattern="/findEmpId" access="permitAll"/>
+         <intercept-url pattern="/findEmpPs" access="permitAll"/>
+<!--          <intercept-url pattern="/dummy" access="hasAuthority('ROLE_ADMIN')"/> -->
+         <intercept-url pattern="/**" access="isAuthenticated()"/>
+      </http>
+</beans:beans>

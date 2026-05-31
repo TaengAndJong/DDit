@@ -1,0 +1,640 @@
+@charset "utf-8";
+
+* {
+    font-family: 'NotoSansKR',sans-serif;
+    line-height: 1.3;
+    box-sizing: border-box!important
+}
+
+html,body {
+    width: 100%;
+  /*   height: 100%; */
+    overflow-x: hidden;
+    position: relative
+}
+
+em,i {
+    font-style: normal
+}
+
+a {
+    display: inline-block;
+    text-decoration: none;
+    color: #333;
+    transition: .3s
+}
+
+a:hover,a:focus {
+    font-weight: normal;
+}
+
+ul {
+    padding-left: 0;
+    margin: 0;
+}
+
+li {
+    list-style: none
+}
+
+.skip,.sr-only {
+    display: block;
+    font-size: 0;
+    clip: rect(0,0,0,0);
+    margin: -1px;
+    padding: 0;
+    position: absolute
+}
+
+
+
+/* btn-custom */
+.btn-custom {
+    color: #fff;
+    background-color: #5346DB;
+    border-color: #5346DB
+}
+
+.btn-custom:hover,.btn-custom:focus,.btn-custom:active {
+    /* background-color: #333840 !important; */
+    /* border-color: #333840 !important; */
+    color: #fff
+}
+
+/* common */
+.user_info {
+    width: calc(100% - 20%);
+    padding-right: 100px;
+}
+
+.user_info > em {
+    font-size: 20px;
+    display: block;
+    width: 100%;
+}
+
+.point_bg {
+    background-color: #6D62E0;
+}
+
+
+
+.chat-conbox .icon {
+    margin: 0;
+}
+
+.chat_top {
+/*     border-radius: 20px; */
+    height: 106px;
+    padding: 20px 30px;
+    align-items: center;
+}
+
+.chat_middle {
+    padding: 30px 0;
+    position: relative;
+    min-height: 500px;
+    /* border-radius: 0; */
+}
+
+.chat_bottom {
+    padding: 0 !important;
+}
+
+.chat_bottom .ul {
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    height: 100px;
+    text-align: center;
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.chat_bottom .li {
+    display: inline-block;
+    width: calc(100% / 4);
+    height: 100%;
+}
+
+.chat_bottom .btn {
+    display: inline-flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.chat_bottom .icon {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
+}
+
+.chat_bottom .txt {
+    color: #7C8080
+}
+
+.chat_in {
+    border-radius: 20px;
+    overflow: hidden;
+    /* border: 1px solid #6D62E0; */
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.chat_in > div {
+    display: block;
+    width: 100%;
+    color: #fff;
+    /* min-height: 300px; */
+    /* background: #fff; */
+}
+
+.chat_tit {
+    font-size: 30px;
+    display: block;
+    margin: 10px 0;
+}
+
+.chat_desc {
+}
+
+.chatPlus {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    position: absolute;
+    right: 30px;
+    bottom: 6%;
+    border: none;
+    background-color: #6D62E0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.chatPlus .icon {
+    height: 30px;
+    width: 30px;
+}
+
+.chat_date {
+    padding: 10px;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background-color: #9088E9;
+    width: 100px;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.chat_date.yesterday, .chat_date.today {
+    background-color: #5346DB;
+}
+
+.room-con .li {
+    color: #888
+}
+
+.room-con .me,.room-con .tm {
+    text-align: right;
+}
+
+.room-con .user {
+    text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.room-con .chat_text,.room-con .tm {
+    display: block;
+    margin: 10px 0;
+}
+
+.room-con .tm,.room-con .user_name {
+    font-weight: bold;
+}
+
+.room-con .chat_text {
+    width: 100%;
+    padding-left: 70px;
+}
+
+/* seach */
+.chat_search {
+    background-color: #fff;
+    border-radius: 40px;
+    overflow: hidden;
+    width: 100%;
+    height: 45px;
+    position: relative;
+    margin: 11px auto;
+}
+
+.chat_search .navi,.chat_search .search_btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.chat_search .navi {
+    color: #fff;
+    font-family: "GmarketSans";
+    /* padding: 8px; */
+    font-weight: bold;
+    border-radius: 50%;
+    left: 7px;
+    width: 32px;
+    height: 32px;
+    /* text-align: center; */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0 0;
+}
+
+.chat_search .search_input {
+    width: 100%;
+    height: 100%;
+    padding-left: 15px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+}
+
+.chat_search .search_btn {
+    right: 0;
+    height: 100%;
+}
+
+/* chatlist */
+.chat_list {
+    height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+}
+
+.chat_list::-webkit-scrollbar {
+    width: 13px;
+}
+
+.chat_list::-webkit-scrollbar-track {
+    background: #E3E3FA
+}
+
+.chat_list::-webkit-scrollbar-thumb {
+    background: #6D62E0;
+    display: block;
+    border-radius: 7px;
+}
+
+.chat_list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.5)
+}
+
+.chat_list .list li{margin-bottom:10px; padding-bottom:10px;border-bottom:1px solid transparent;transition:border 0.3s}
+.chat_list .list li:hover {
+    border-bottom: 1px solid rgba(109, 98, 208, 0.2);
+}
+
+.chat_list .content {
+    padding: 0 30px;
+}
+
+.chat_list .content .li {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #888;
+}
+
+.chat_list .content .li:first-child {
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    z-index: 4;
+}
+
+.chat_list .content .li:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+}
+
+/* no_content */
+.chat_list.nolist {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no_content {
+    text-align: center;
+}
+
+.no_content .icon {
+    width: 80px;
+    height: 80px;
+    background-size: contain
+}
+
+.no_content em {
+    font-size: 20px;
+    color: #7C8080;
+    display: block
+}
+
+/* img */
+.chat_in .imgbox {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    margin-right: 15px;
+    min-width: 60px;
+}
+
+.chat_in .imgbox .img-in {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.chat_in .imgbox img {
+    display: block;
+    width: auto;
+    height: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+/* noimg */
+.chat_in .imgbox .img-in.no-img {
+    border-radius: 50%;
+}
+
+/* status */
+.chat_status {
+    left: 50%;
+    /* width: 100%; */
+    height: auto;
+    /* max-width: 170px; */
+    position: absolute;
+    width: 170px;
+    top: 35%;
+}
+
+.status_btn {
+    width: 100%;
+    height: 50px;
+    background-color: transparent;
+    border: none;
+    padding-left: 15px;
+}
+
+.status_btn,.chat_status li {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* padding-left: 15px; */
+}
+
+.chat_status .icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-position-x: 7px;
+}
+
+.chat_status .ul {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    margin-top: -1px;
+    ; opacity: 0;
+    visibility: hidden;
+    height: 0;
+    transition: all 0.3s;
+}
+
+.chat_status li {
+    cursor: pointer;
+}
+
+.chat_status li:not(:last-child) {
+    padding-bottom: 10px;
+}
+
+.chat_status .txt {
+    color: #7C8080;
+    margin-left: 17px;
+}
+
+.status_btn.open {
+}
+
+.status_btn.open + .ul {
+    opacity: 1;
+    visibility: visible;
+    height: auto;
+}
+
+/* roomleader */
+.roomleader {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+
+.fnc {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+}
+
+.fnc * {
+    display: inline-block
+}
+
+.fnc button {
+    padding: 5px
+}
+
+.chat_in.chat_room {
+    background-color: #E3E3FA;
+}
+
+.chat_in.chat_room > div {
+    height: 100%;
+    padding: 20px;
+}
+
+.chat_in.chat_room .chat_middle {
+    overflow-y: auto;
+}
+
+.chat_in.chat_room .room-con {
+    height: 100%;
+}
+
+/* pw */
+.chat_pw {
+    text-align: center;
+}
+
+.chat_pw .chat_top {
+    height: 200px;
+    padding: 40px 20px;
+}
+
+.chat_pw .chat_top {
+    text-align: left;
+}
+
+.chat_pw .chat_middle {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    background: #fff;
+}
+
+.chat_pw .chat_middle * {
+    width: 100%;
+}
+
+.chat_pw .chat_middle > * {
+    max-width: calc(100% - 160px);
+    display: inline-block;
+}
+
+.chat_pw .chat_middle input[type="password"] {
+    border: 0;
+    border-bottom: 1px solid #ddd;
+    height: 60px;
+    margin-bottom: 30px;
+    border-radius: 0;
+}
+
+.chat_pw .chat_middle .btn {
+    border-radius: 30px;
+    margin: 10px 0 0;
+    padding: 20px 0;
+}
+
+/* 채팅방 채팅입력창*/
+.chatInput {
+    margin-top: 20px;
+}
+
+.fileInput {
+    display: flex;
+    position: relative;
+    width: 100%;
+    float: left;
+}
+
+.fileInput {
+    margin: 10px 0;
+}
+
+.fileInput input {
+    width: 80%;
+    padding: 0 10px;
+}
+
+.fileInput input + button {
+    width: 20%;
+}
+
+.btn_send {
+}
+
+.fileInput,.btn_send {
+    height: 50px;
+    width: 100%;
+}
+
+/* group */
+.chat_in .imgbox.group .icon {
+    width: 100%;
+    height: 100%;
+}
+
+/* button current일 떄 */
+.chat_bottom .btn.current .txt {
+    color: #5346DB;
+    font-weight: bold;
+}
+
+.chat_bottom .btn.current .icon.list {
+    background-image: url("data:image/svg+xml,%3Csvg width='24' height='25' viewBox='0 0 24 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.3077 1.5H2.69231C1.75767 1.5 1 2.25767 1 3.19231V21.8077C1 22.7423 1.75767 23.5 2.69231 23.5H21.3077C22.2423 23.5 23 22.7423 23 21.8077V3.19231C23 2.25767 22.2423 1.5 21.3077 1.5Z' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7.76953 8.26923H16.2311' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7.76953 12.5H16.2311' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7.76953 16.7308H16.2311' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A")
+}
+
+.chat_bottom .btn.current .icon.chat_bubble {
+    background-image: url("data:image/svg+xml,%3Csvg width='24' height='27' viewBox='0 0 24 27' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.88867 6.39948H15.6664' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5.88867 11.799H10.7776' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20.5556 1H3.44444C2.09441 1 1 2.20872 1 3.69975V17.1985C1 18.6896 2.09441 19.8982 3.44444 19.8982H7.11111L11.5678 24.8204C11.8065 25.0841 12.1935 25.0841 12.4322 24.8204L16.8889 19.8982H20.5556C21.9056 19.8982 23 18.6896 23 17.1985V3.69975C23 2.20872 21.9056 1 20.5556 1Z' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
+}
+
+.chat_bottom .btn.current .icon.group {
+    background-image: url("data:image/svg+xml,%3Csvg width='27' height='26' viewBox='0 0 27 26' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.65401 10.1537C12.0437 10.1537 13.9809 8.21653 13.9809 5.82687C13.9809 3.4372 12.0437 1.5 9.65401 1.5C7.26435 1.5 5.32715 3.4372 5.32715 5.82687C5.32715 8.21653 7.26435 10.1537 9.65401 10.1537Z' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M18.3075 24.5765H1V22.6535C1 20.3584 1.91173 18.1573 3.53462 16.5344C5.15751 14.9115 7.35862 13.9998 9.65373 13.9998C11.9488 13.9998 14.15 14.9115 15.7728 16.5344C17.3957 18.1573 18.3075 20.3584 18.3075 22.6535V24.5765Z' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M17.3462 1.5C18.4937 1.5 19.5943 1.95586 20.4057 2.76731C21.2172 3.57875 21.6731 4.67931 21.6731 5.82687C21.6731 6.97442 21.2172 8.07498 20.4057 8.88642C19.5943 9.69787 18.4937 10.1537 17.3462 10.1537' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20.4233 14.3654C22.0615 14.9886 23.4718 16.0945 24.4676 17.5367C25.4634 18.979 25.9979 20.6896 26.0002 22.4422V24.5768H23.1156' stroke='%235346DB' stroke-opacity='1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
+}
+
+.chat_bottom .btn.current .icon.setting {
+    background-image: url("data:image/svg+xml,%3Csvg width='22' height='24' viewBox='0 0 22 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11.0001 7.37054C10.1561 7.37054 9.33109 7.62081 8.62936 8.08969C7.92763 8.55857 7.3807 9.225 7.05773 10.0047C6.73476 10.7844 6.65026 11.6424 6.8149 12.4702C6.97955 13.2979 7.38596 14.0582 7.98273 14.655C8.5795 15.2518 9.33983 15.6582 10.1676 15.8228C10.9953 15.9875 11.8533 15.903 12.633 15.58C13.4127 15.257 14.0792 14.7101 14.5481 14.0084C15.0169 13.3067 15.2672 12.4816 15.2672 11.6377C15.2659 10.5064 14.8159 9.42175 14.016 8.62178C13.216 7.82181 12.1314 7.37183 11.0001 7.37054ZM11.0001 14.3531C10.463 14.3531 9.93798 14.1939 9.49143 13.8955C9.04488 13.5971 8.69683 13.173 8.4913 12.6768C8.28578 12.1807 8.232 11.6347 8.33678 11.1079C8.44155 10.5812 8.70018 10.0973 9.07994 9.71757C9.4597 9.33781 9.94355 9.07919 10.4703 8.97441C10.997 8.86963 11.543 8.92341 12.0392 9.12893C12.5354 9.33446 12.9595 9.68251 13.2579 10.1291C13.5563 10.5756 13.7155 11.1006 13.7155 11.6377C13.7147 12.3576 13.4283 13.0478 12.9193 13.5569C12.4102 14.066 11.72 14.3523 11.0001 14.3531Z' fill='%235346DB' fill-opacity='0.5'/%3E%3Cpath d='M21.6459 14.8535L20.1053 13.5853C20.3784 12.3012 20.3784 10.9741 20.1053 9.69001L21.6459 8.42184C21.8236 8.27626 21.9436 8.07219 21.9845 7.84617C22.0255 7.62014 21.9846 7.38693 21.8692 7.1883L20.2879 4.44942C20.1735 4.25014 19.992 4.09809 19.7757 4.02051C19.5595 3.94294 19.3227 3.94492 19.1077 4.0261L17.2379 4.72664C16.2639 3.84658 15.1147 3.18241 13.8659 2.77772L13.5378 0.810421C13.5007 0.583697 13.384 0.377612 13.2087 0.229105C13.0334 0.0805983 12.8109 -0.000621489 12.5812 3.58117e-06H9.41857C9.18884 -0.000613534 8.96639 0.0806029 8.79109 0.229098C8.6158 0.377594 8.49912 0.583662 8.46196 0.810373L8.13406 2.77772C6.88525 3.1824 5.73611 3.84657 4.76205 4.72664L2.89202 4.026C2.67711 3.94488 2.44034 3.94293 2.22412 4.02051C2.0079 4.09809 1.82638 4.25012 1.71206 4.44937L0.130747 7.18844C0.0154183 7.38709 -0.0254234 7.62031 0.0155365 7.84632C0.0564965 8.07234 0.176583 8.2764 0.354287 8.42194L1.89468 9.69001C1.62158 10.9741 1.62158 12.3012 1.89468 13.5853L0.354142 14.8535C0.176465 14.9991 0.0564122 15.2031 0.0154797 15.4292C-0.0254529 15.6552 0.0154085 15.8884 0.130747 16.087L1.71211 18.8259C1.82644 19.0252 2.00799 19.1772 2.22424 19.2548C2.44049 19.3324 2.67729 19.3304 2.89222 19.2492L4.7621 18.5487C5.73616 19.4288 6.8853 20.0929 8.13411 20.4976L8.462 22.4649C8.49915 22.6916 8.61582 22.8977 8.79111 23.0462C8.9664 23.1947 9.18884 23.2759 9.41857 23.2753H12.5812C12.8109 23.276 13.0334 23.1947 13.2087 23.0462C13.384 22.8977 13.5007 22.6917 13.5378 22.465L13.8658 20.4976C15.1146 20.0929 16.2637 19.4288 17.2378 18.5487L19.1077 19.2493C19.3227 19.3304 19.5594 19.3324 19.7757 19.2548C19.9919 19.1772 20.1734 19.0252 20.2877 18.826L21.8689 16.0869C21.9843 15.8883 22.0252 15.6551 21.9843 15.4292C21.9435 15.2032 21.8235 14.9991 21.6459 14.8535ZM19.1905 17.6233L16.8577 16.7493L16.5045 17.1049C15.5325 18.0845 14.3169 18.7871 12.9828 19.1402L12.4979 19.268L12.0884 21.7236H9.91172L9.50236 19.268L9.01746 19.1402C7.68344 18.7871 6.46777 18.0845 5.49586 17.1049L5.1426 16.7493L2.8094 17.6233L1.72123 15.7381L3.64285 14.1562L3.51192 13.6726C3.15187 12.3399 3.15187 10.9355 3.51192 9.60277L3.64285 9.11923L1.72123 7.53728L2.80964 5.65208L5.14246 6.52607L5.49571 6.17044C6.46762 5.19082 7.68329 4.48823 9.01731 4.13516L9.50222 4.00734L9.91152 1.55169H12.0884L12.4978 4.00734L12.9827 4.13516C14.3167 4.48823 15.5324 5.19082 16.5043 6.17044L16.8576 6.52607L19.1904 5.65208L20.2788 7.53723L18.3572 9.11923L18.4881 9.60277C18.8482 10.9355 18.8482 12.3399 18.4881 13.6726L18.3572 14.1562L20.2788 15.7381L19.1905 17.6233Z' fill='%235346DB' fill-opacity='0.5'/%3E%3C/svg%3E%0A");
+}
+
+
+.chat-box .btn.close{
+    float: none;
+    background-color: transparent;
+    opacity: 1;
+}
+.chat-box .btn.close .icon.left_arrow:hover,.chat-box .btn.close .icon.left_arrow:focus{
+	  background-color: transparent;
+}
+
+
+/* ㅠㅠㅠ */
+.font{
+	color:black;
+}
+.flex-container {
+    display: flex;
+    align-items: center;
+}
+
+
+.radius-img {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    border-radius: 50%;
+   
+}
+
+.empImg{width:50px; height:50px; margin-right: 10px;border: 1px solid #ddd;
+    border-radius: 50%;}
+
+.me {
+	padding: 20px;
+	margin-top: 0px !important;
+	background: rgba(109,98,208,0.2);
+}
+
+#command{/* background:#fff; */}

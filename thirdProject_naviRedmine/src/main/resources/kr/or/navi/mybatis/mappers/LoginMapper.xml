@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.login.dao.LoginDAO">
+<select id="selectEmpRrno" resultType="EmpVO">
+SELECT EMP_MAIL,EMP_RRNO,EMP_ID FROM EMP WHERE EMP_NAME = #{empName} AND EMP_RRNO = #{empRrno}
+</select>
+<select id="selectEmpPs" resultType="EmpVO">
+SELECT EMP_PASS,EMP_MAIL FROM EMP WHERE EMP_NAME = #{empName} AND EMP_RRNO = #{empRrno} AND EMP_ID = #{empId}
+</select>
+</mapper>

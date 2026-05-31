@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.quick.certificate.dao.CertDAO">
+
+
+<resultMap type="CertVO" id="certMap">
+<id property="certId" column="CERT_ID"/>
+<id property="certRange" column="CERT_RANGE"/>
+<id property="certName" column="CERT_NAME"/>
+<id property="certUrl" column="CERT_URL"/>
+<id property="certImgUrl" column="CERT_IMG_URL"/>
+<id property="certInfo" column="CERT_INFO"/>
+
+<result property="certId" column="CERT_ID" jdbcType="CHAR"/>
+<result property="certRange" column="CERT_RANGE" jdbcType="VARCHAR"/>
+<result property="certName" column="CERT_NAME" jdbcType="VARCHAR"/>
+<result property="certUrl" column="CERT_URL" jdbcType="VARCHAR"/>
+<result property="certImgUrl" column="CERT_IMG_URL" jdbcType="VARCHAR"/>
+<result property="certInfo" column="CERT_INFO" jdbcType="CLOB"/>
+</resultMap>
+
+
+	<select id="selectCertList" resultType="CertVO">
+		SELECT
+		cert_id
+		, cert_range
+		, cert_name
+		, cert_url
+		, cert_img_url
+		, cert_info
+		FROM
+		certificate
+		ORDER BY cert_id
+	</select>
+	
+	<select id="selectRecomCertList" resultMap="certMap">
+		SELECT
+		certificate.cert_id
+		, certificate.cert_range
+		, certificate.cert_name
+		, certificate.cert_url
+		, certificate.cert_img_url
+		, certificate.cert_info
+		FROM
+		certificate join cert_recom on (certificate.cert_id = cert_recom.cert_id)
+		WHERE
+				cert_recom.age_cg_id= '${map.age}'
+			and cert_recom.career_id = '${map.career}' 
+			and cert_recom.cert_cg_id= '${map.category}'
+		ORDER BY
+		cert_recom.cert_rank
+	</select>
+</mapper>

@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.board.prais.dao.PraisDAO">
+	<sql id="searchFrag">
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			and
+				<choose>
+					<when test="simpleCondition.searchType eq 'title'">
+						INSTR(BP_TITLE, #{simpleCondition.searchWord}) > 0	
+					</when>
+					<when test="simpleCondition.searchType eq 'name'">
+						INSTR(EMP.EMP_NAME, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(BP_TITLE, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(EMP.EMP_NAME, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+	</sql>
+	
+	<select id="selectAnoListBoard" resultType="BoardPostVO">
+		SELECT B.* FROM(
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT
+					bp_id
+					, bp_title
+					, bp_reg_dt
+					, bp_cnt
+					, bp_ntc_id
+					, COMMON.CM_NAME as bp_ntc_name
+				FROM
+					board_post
+				JOIN COMMON ON
+					(BOARD_POST.BP_NTC_ID=COMMON.CM_ID)
+				WHERE BRD_ID = 'BN0001' 
+				and bp_ntc_id ='BN0003'
+				AND bp_del_dt IS NULL
+			ORDER BY BP_REG_DT DESC
+			) A
+			
+		) B
+		<![CDATA[
+			where
+				rnum <=3
+			]]>
+	</select>
+	
+	<select id="selectPraisList" resultMap="praisMap" parameterType="PaginationInfo">
+		SELECT B.* FROM(
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT
+				    bp_id
+				  , emp.emp_name
+				  , bp_title
+				  , bp_cn
+				  , bp_reg_dt
+				  , bp_cnt
+				FROM
+				    board_post
+				JOIN
+					EMP ON(board_post.emp_id = emp.emp_id)
+				WHERE
+					BRD_ID = 'BN0003'
+				AND 
+					bp_del_dt IS NULL
+					<include refid="searchFrag" />
+				ORDER BY 
+					BP_REG_DT DESC
+				) A
+			) B
+			<where>
+				<if test="startRow gt 0 and endRow gt 0">
+					<![CDATA[
+						RNUM >= #{startRow} AND RNUM <= #{endRow}
+					]]>
+				</if>
+			</where>
+	</select>
+	
+	<select id="totalRecord" parameterType="PaginationInfo">
+			select COUNT(*)FROM
+				(SELECT
+				    bp_id
+				  , emp.emp_name
+				  , bp_title
+				  , bp_reg_dt
+				  , bp_cnt
+				FROM
+				    board_post
+				JOIN
+					EMP ON(board_post.emp_id = emp.emp_id)
+				WHERE
+					BRD_ID = 'BN0003'
+				AND 
+					bp_del_dt IS NULL
+					<include refid="searchFrag" />
+				ORDER BY 
+					BP_REG_DT DESC
+			) A
+	</select>
+	
+	<select id="selectPrais" resultMap="praisMap">
+				SELECT
+				    bp_id
+				  , EMP.emp_name
+				  , EMP.EMP_ID
+				  , bp_mod_id
+				  , bp_title
+				  , bp_cn
+				  , bp_reg_dt
+				  , bp_cnt
+				  , bp_mod_dt
+				  , brd_id
+				FROM
+				    board_post
+				JOIN
+				    EMP ON(board_post.emp_id = emp.emp_id)
+				WHERE BRD_ID = 'BN0003'
+				AND BP_ID = #{bpId}
+	</select>
+	<resultMap type="BoardPostVO" id="praisMap" autoMapping="true">
+		<id column="BP_ID" property="bpId"/>
+		<result column="BP_CN" property="bpCn" jdbcType="CLOB"/>
+	</resultMap>
+	
+	<update id="updatePrais" parameterType="BoardPostVO">
+			UPDATE
+			    BOARD_POST
+			SET
+			    BP_TITLE = #{vo.bpTitle}
+			    , BP_MOD_ID = #{vo.bpModId}
+			    , BP_MOD_DT = SYSTIMESTAMP
+			    , BP_CN = #{vo.bpCn}
+			WHERE
+			    BOARD_POST.BRD_ID = 'BN0003' AND BOARD_POST.BP_ID = #{vo.bpId}
+	</update>
+	
+	<delete id="deletePrais">
+		UPDATE board_post
+			SET
+			    bp_del_dt = SYSTIMESTAMP
+			WHERE
+			    bp_id = #{bpId}
+	</delete>
+	
+	<insert id="insertPrais" parameterType="BoardPostVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="bpId">
+			SELECT 
+				'B' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(MAX(BP_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM BOARD_POST
+	</selectKey>
+	
+			INSERT INTO board_post (
+					    bp_id
+					    , emp_id
+					    , bp_mod_id
+					    , brd_id
+					    , bp_title
+					    , bp_cn
+					    , bp_reg_dt
+					    , bp_del_dt
+					    , bp_op_yn
+					    , bp_cnt
+					    , bp_mod_dt
+					    , bp_shr_yn
+					    , bp_ntc_id
+					    , bp_qna_as
+					    , bp_qna_yn
+					) VALUES (
+					    #{bpId}
+					  , #{empId}
+					  , NULL
+					  , 'BN0003'
+					  , #{bpTitle}
+					  , #{bpCn,jdbcType=CLOB}
+					  , SYSTIMESTAMP
+					  , NULL
+					  , NULL
+					  , 0
+					  , NULL
+					  , NULL
+					  , 'BN0003'
+					  , NULL
+					  , NULL
+					)
+	</insert>
+	
+	<insert id="insertFile" parameterType="BoardPostFileVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="bpFileId">
+			SELECT 
+				'F' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(BP_FILE_ID), 2)
+				            ), 0) + 1, 5, '0')
+							FROM BOARD_POST_FILE
+	</selectKey>
+			INSERT INTO board_post_file (
+			    bp_file_id
+			    , bp_id
+			    , bp_file_gb_id
+			    , bp_uuid_name
+			    , bp_org_nm
+			    , bp_main_img_yn
+			    , bp_file_size
+			) VALUES (
+			    #{bpFileId}
+			  , #{bpId}
+			  , #{bpFileGbId}
+			  , #{bpUuidName}
+			  , #{bpOrgNm}
+			  , NULL
+			  , #{bpFileSize}
+			)
+	</insert>
+	
+	<select id="selectFile" resultType="BoardPostFileVO">
+			SELECT
+			    bp_file_id
+			  , board_post.bp_id
+			  , bp_uuid_name
+			  , bp_org_nm
+			  , bp_file_gb_id
+			  , bp_main_img_yn
+			  , bp_file_size
+			FROM
+			    board_post_file
+			join
+			    board_post on(board_post_file.bp_id = board_post.bp_id)
+			where
+			    board_post_file.bp_id = #{bpId}
+	</select>
+	
+	<select id="getAttach" parameterType="String" resultType="BoardPostFileVO">
+			SELECT
+			    bp_file_id
+			  , bp_id
+			  , bp_file_gb_id
+			  , bp_uuid_name
+			  , bp_org_nm
+			  , bp_main_img_yn
+			  , bp_file_size
+			FROM
+			    board_post_file
+			WHERE
+			    bp_file_id = #{bpFileId}
+	</select>
+	
+	<update id="updateCnt">
+		UPDATE
+		    BOARD_POST
+		SET
+		  BP_CNT = BP_CNT + 1
+		WHERE
+		    BOARD_POST.BRD_ID = 'BN0003' AND BOARD_POST.BP_ID = #{bpId}
+	</update>
+	
+	<delete id="deleteFileSaveFile">
+	DELETE FROM BOARD_POST_FILE WHERE bp_file_id = #{bpFileId}
+	</delete>
+	
+		
+	<resultMap type="BoardCommentVO" id="boardCommentMap" autoMapping="true">
+		<id column="BC_ID" property="bcId"/>
+		<result column="BC_CN" property="bcCn" jdbcType="CLOB"/>
+		<association property="emp" javaType="EmpVO">
+			<result column="EMP_IMAGE" property="empImage" />
+		</association>
+	</resultMap>
+	<select id="selectBoardCommentList" resultMap="boardCommentMap">
+	SELECT
+		BC_ID
+		 , BC_TOP_ID
+		 , BP_ID
+		 , EMP_NAME
+		 , EMP_IMG
+		 , EMP_IMAGE
+		 , DEPT.DEPT_NAME
+		 , PS_NAME
+		 , BP_ID
+		 , BC_REG_DT
+		 , BC_MOD_DT
+		 , BC_CN
+		 , BC_DEL_YN
+		 , LEVEL as depth
+	FROM
+		BOARD_COMMENT
+	JOIN EMP ON(BOARD_COMMENT.EMP_ID=EMP.EMP_ID) 
+	JOIN DEPT ON (EMP.DEPT_ID=DEPT.DEPT_ID)
+	JOIN POSITION ON(EMP.PS_ID = POSITION.PS_ID)
+	WHERE BP_ID=#{bpID}
+	
+	START WITH BP_ID = #{bpID} and bc_top_id IS NULL
+	CONNECT BY PRIOR
+		bc_id = bc_top_id
+	ORDER SIBLINGS BY CASE
+	WHEN bc_top_id IS NULL THEN bc_reg_dt
+	ELSE (SELECT bc_reg_dt FROM BOARD_COMMENT WHERE bc_id = bc_top_id) END, bc_reg_dt
+	</select>
+	
+	<delete id="deleteBoardComment" >
+	UPDATE BOARD_COMMENT SET BC_DEL_YN = 'Y' WHERE BC_ID IN  #{bcId}
+	</delete>
+	
+	
+	<insert id="insertBoardComment" parameterType="BoardCommentVO">
+	<selectKey order="BEFORE" resultType="string" keyProperty="bcId">
+			SELECT 
+		    'B'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(BC_ID),5)),0)+1,5,'0') 
+		    FROM BOARD_COMMENT
+		</selectKey>
+		INSERT INTO BOARD_COMMENT (
+			BC_ID
+			, BC_TOP_ID
+			, BP_ID
+			, EMP_ID
+			, BC_REG_DT
+			, BC_CN
+			, BC_DEL_YN
+		) VALUES (
+		#{bcId}
+		, #{bcTopId}
+		, #{bpId}
+		, #{empId}
+		, SYSTIMESTAMP
+		, #{bcCn,jdbcType=CLOB}
+		, 'N'
+		)
+	</insert>
+	
+</mapper>
+

@@ -1,0 +1,4 @@
+구글 : https://storyjava.tistory.com/143
+안드로이드 http://www.joshi.co.kr/?document_srl=541&mid=board_QBES95&listStyle=viewer&page=7
+ Html5 음성인식 : 
+Web Speech API 인터페이스 : https://developer.mozilla.org/ko/docs/Web/API/Web_Speech_API

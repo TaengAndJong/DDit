@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.weather.dao.WeatehrDAO">
+	<select id="selectWeatherList" resultType="WeatherVO">
+		SELECT 
+        TRIM(WEATHER_ID) AS WEATHER_ID,
+        WEATHER_TYPE,
+        DUST,
+        UV,
+        TEMP
+    FROM 
+        WEATHER
+	</select>
+	
+	<select id="selectCurWeather" resultType="WeatherVO">
+		SELECT 
+        TRIM(WEATHER_ID) AS WEATHER_ID,
+        WEATHER_TYPE,
+        DUST,
+        UV,
+        TEMP
+    FROM 
+        WEATHER
+    WHERE
+        ROWID = (SELECT MAX(ROWID) FROM WEATHER)
+		
+	</select>
+
+</mapper>

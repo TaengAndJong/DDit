@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.navi.projectdetail.calendar.dao.TaskFulDAO">
+	<resultMap type="TaskVO" id="taskFulMap" autoMapping="true">
+		<id property="taskId" column="TASK_ID" />
+		<association property="projectVO" autoMapping="true">
+			<id column="PRO_ID" property="proId" />
+		</association>
+		<association property="tsVO" autoMapping="true">
+			<id column="TS_ID" property="tsId" />
+		</association>
+	</resultMap>
+	
+	
+	
+	<resultMap type="TaskFulAdapterVO" id="taskAdapterMap" autoMapping="true">
+		<id column="SOLAR_DATE" property="solasrDate" />
+		<collection property="taskList" javaType="list"
+			 resultMap="taskFulMap">
+		</collection>
+	</resultMap>
+	
+	
+	<select id="selectTaskList" resultMap="taskFulMap">
+		SELECT
+  c.SOLAR_DATE
+   , task_id
+  , task_status.ts_id
+  , task_status.ts_time
+  , task_status.ts_name
+  , project.pro_id
+  , project.pro_name
+  , pro_st_id
+  , CM_NAME
+  , pro_desc
+  , pro_reg_dt
+  , pro_ddline_ex
+  , pro_ddline_dt
+  , pro_ddline_yn
+  , pro_del_yn
+  , task_man_id
+  , task_top_id
+  , tps_id
+  , task_reg_id
+  , task_title
+  , TO_CHAR(task_reg_dt, 'YYYYMMDD') AS task_reg_date
+   , task_reg_Dt
+  , task_ddline_dt
+  , task_mod_dt
+  , task_cn
+  , task_rqrd
+  , task_est_time
+  , task_comp_dt
+  , task_del_dt
+  , emp.emp_name
+  
+FROM calendar c
+LEFT OUTER JOIN task t ON c.solar_date = TO_CHAR(t.task_reg_dt, 'YYYYMMDD')
+    join project on (t.pro_id = project.pro_id)
+    join task_status on(t.ts_id=task_status.ts_id)
+    join COMMON ON(PROJECT.PRO_ST_ID=COMMON.CM_ID)
+    join emp on (t.task_man_id = emp.emp_id)
+WHERE project.pro_id=#{proId}
+and t.task_del_dt is null
+and c.SOLAR_DATE = #{solaDate}
+	</select>
+	<resultMap type="TaskFulAdapterVO" id="sorlarMap">
+		<id property="solasrDate" column="SOLAR_DATE"/>
+	</resultMap>
+	<select id="selectTaskFulAdapterVOList"
+		resultMap="sorlarMap">
+    select SOLAR_DATE from calendar c where c.solar_date BETWEEN '20240101' AND TO_CHAR(CURRENT_DATE, 'YYYYMMDD')
+	</select>
+	
+</mapper>

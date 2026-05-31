@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.admin.project.dao.AdminProjectDAO">
+	<resultMap type="ProjectVO" id="projectMap"
+		autoMapping="true">
+		<id property="proId" column="PRO_ID" />
+		<collection property="teamList" ofType="TeamVO"
+			autoMapping="true">
+			<id property="proId" column="PRO_ID" />
+			<id property="empId" column="EMP_ID" />
+		</collection>
+	</resultMap>
+
+		<sql id="searchFrag">
+		<trim suffixOverrides="AND">
+			<if test="not detailCondition.empty">
+				AND
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.projectState)">
+					 pro_st_id = #{detailCondition.projectState} AND 
+				</if>
+				<if test="detailCondition.ing == 'ing'">
+					PRO_DEL_YN IS NULL AND
+				</if>
+			
+				<if test="detailCondition.ing !='ing'">
+				    PRO_DEL_YN IS NOT NULL AND
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.project)">
+					(INSTR(project.PRO_ID, #{detailCondition.project}) > 0 
+					OR
+					INSTR(project.PRO_NAME, #{detailCondition.project}) > 0 
+					OR
+					INSTR(emp.EMP_NAME, #{detailCondition.project}) > 0 )
+				</if>
+			</if>
+		</trim>
+	</sql>
+	
+	
+	<select id="selectList" resultMap="projectMap" parameterType="PaginationInfo">
+		SELECT B.*
+		FROM(
+			SELECT ROWNUM RNUM, A.*
+			FROM(
+				SELECT
+					PROJECT.PRO_ID,
+					PRO_ST_ID,
+					PRO_NAME,
+					PRO_DESC,
+					PRO_REG_DT,
+					PRO_DDLINE_EX,
+					PRO_DDLINE_DT,
+					PRO_DDLINE_YN,
+					PRO_DEL_YN,
+					TEAM.EMP_ID,
+					TEAM.ROLE_ID,
+					TEAM.TEAM_YN,
+					EMP.EMP_NAME,
+					COMMON.CM_NAME,
+					COMMON.CM_ID
+				FROM
+					PROJECT INNER JOIN TEAM ON (PROJECT.PRO_ID=TEAM.PRO_ID) INNER JOIN EMP
+					ON(TEAM.EMP_ID=EMP.EMP_ID) INNER JOIN COMMON ON (PROJECT.PRO_ST_ID =
+					COMMON.CM_ID)
+					WHERE TEAM.ROLE_ID = 'ROLE_PL'  
+				<include refid="searchFrag" />
+			) A
+		) B
+		<where>
+			<if test="startRow gt 0 and endRow gt 0">
+				<![CDATA[
+					RNUM >= #{startRow} AND RNUM <= #{endRow}
+				]]>
+			</if>
+		</where>
+	</select>
+
+
+
+	<select id="selectTotalRecord">
+		WITH PROJ AS (
+			SELECT
+				PROJECT.PRO_ID,
+				PRO_ST_ID,
+				PRO_NAME,
+				PRO_DESC,
+				PRO_REG_DT,
+				PRO_DDLINE_EX,
+				PRO_DDLINE_DT,
+				PRO_DDLINE_YN,
+				PRO_DEL_YN,
+				TEAM.EMP_ID,
+				TEAM.ROLE_ID,
+				TEAM.TEAM_YN,
+				EMP.EMP_NAME,
+				COMMON.CM_NAME,
+				COMMON.CM_ID
+			FROM
+				PROJECT INNER JOIN TEAM ON (PROJECT.PRO_ID=TEAM.PRO_ID) INNER JOIN EMP
+				ON(TEAM.EMP_ID=EMP.EMP_ID) INNER JOIN COMMON ON (PROJECT.PRO_ST_ID =
+				COMMON.CM_ID)
+			WHERE TEAM.ROLE_ID = 'ROLE_PL'
+			<include refid="searchFrag" />
+			ORDER by pro_reg_dt desc 
+		)
+		SELECT COUNT(*) FROM PROJ  
+	</select>
+
+
+	<delete id="deleteCheckedProject">
+		UPDATE PROJECT SET PRO_DEL_YN = 'Y' WHERE PRO_ID IN 
+		<foreach collection="projects" item="proj" open="(" close=")" separator=",">
+		#{proj.proId}
+		</foreach>
+	</delete>
+                      
+
+
+	<update id="restoreCheckedProject">
+		UPDATE PROJECT SET PRO_DEL_YN = NULL WHERE PRO_ID IN
+		<foreach collection="projects" item="proj" open="(" close=")" separator=",">                                 
+		#{proj.proId}
+		</foreach>
+	</update>
+
+	<select id="selectNewTotalRecord">
+		WITH PROJ AS (
+			SELECT
+				PROJECT.PRO_ID,
+				PRO_ST_ID,
+				PRO_NAME,
+				PRO_DESC,
+				PRO_REG_DT,
+				PRO_DDLINE_EX,
+				PRO_DDLINE_DT,
+				PRO_DDLINE_YN,
+				PRO_DEL_YN
+			FROM PROJECT
+			WHERE PRO_ST_ID = 'PS0001' AND PRO_DEL_YN IS NULL
+		)
+		SELECT COUNT(*) FROM PROJ 
+	</select>
+	
+	<select id="selectQuickTotalRecord">
+		WITH PROJ AS (
+			SELECT
+				PROJECT.PRO_ID,
+				PRO_ST_ID,
+				PRO_NAME,
+				PRO_DESC,
+				PRO_REG_DT,
+				PRO_DDLINE_EX,
+				PRO_DDLINE_DT,
+				PRO_DDLINE_YN,
+				PRO_DEL_YN
+			FROM PROJECT
+			WHERE PRO_ST_ID = 'PS0003' AND PRO_DEL_YN IS NULL
+		)
+		SELECT COUNT(*) FROM PROJ 
+	</select>
+	
+	<select id="selectSafeTotalRecord">
+		WITH PROJ AS (
+			SELECT
+				PROJECT.PRO_ID,
+				PRO_ST_ID,
+				PRO_NAME,
+				PRO_DESC,
+				PRO_REG_DT,
+				PRO_DDLINE_EX,
+				PRO_DDLINE_DT,
+				PRO_DDLINE_YN,
+				PRO_DEL_YN
+			FROM PROJECT
+			WHERE PRO_ST_ID = 'PS0002' AND PRO_DEL_YN IS NULL
+		)
+		SELECT COUNT(*) FROM PROJ 
+	</select>
+	
+	<select id="selectDelTotalRecord">
+		WITH PROJ AS (
+			SELECT
+				PROJECT.PRO_ID,
+				PRO_ST_ID,
+				PRO_NAME,
+				PRO_DESC,
+				PRO_REG_DT,
+				PRO_DDLINE_EX,
+				PRO_DDLINE_DT,
+				PRO_DDLINE_YN,
+				PRO_DEL_YN
+			FROM PROJECT
+			WHERE PRO_DEL_YN IS NOT NULL
+		)
+		SELECT COUNT(*) FROM PROJ 
+	</select>
+
+
+</mapper>

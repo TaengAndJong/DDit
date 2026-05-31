@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+.fc .fc-daygrid-event-harness {}
+.fc .fc-daygrid-event-harness  .fc-event  {margin:0}
+.fc .fc-daygrid-event-harness ,
+.fc .fc-daygrid-event-harness .fc-event
+,.fc .fc-daygrid-event-harness .fc-event >  div{width:100%;}
+.fc .fc-daygrid-event-harness .fc-event:hover{background-color:transparent; color: #333; border:1pxs solid #0b5ed7;font-weight:normal}
+.cal-today_box{width: calc(100% - 10px); margin:0 auto}
+.cal-today_box button[type="button"]{height:38px}
+
+
+.clanendarModal .modal-dialog{max-width:1000px}
+.clanendarModal .cal-Modal_table{
+    max-height: none;
+    /* min-height: auto; */
+    }

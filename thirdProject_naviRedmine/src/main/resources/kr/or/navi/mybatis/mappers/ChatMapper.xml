@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.chat.web.dao.ChatDAO">
+
+	<!-- 사원목록 -->
+	<select id="selectChatEmpList" resultType="EmpVO">
+	    SELECT A.*, B.ROOM_ID, B.LAST_CHAT, B.LAST_CHAT_SEND_DT
+		FROM
+		(
+		    SELECT E.EMP_IMG, E.EMP_ID, E.DEPT_ID, D.DEPT_NAME, E.PS_ID, P.PS_NAME, E.EMP_NAME, E.EMP_PASS, E.EMP_IMAGE
+		    FROM EMP E
+		    JOIN POSITION P ON (E.PS_ID = P.PS_ID)
+		    JOIN DEPT D ON (E.DEPT_ID = D.DEPT_ID)
+		    WHERE EMP_PASS IS NOT NULL AND NOT E.EMP_ID = #{empId} AND NOT EMP_ID = 'E00003'
+		    ORDER BY DEPT_NAME DESC, EMP_NAME DESC
+		) A
+		LEFT JOIN
+		(
+		    SELECT CU1.ROOM_ID, CU1.EMP_ID, c.chat_cn AS LAST_CHAT, C.CHAT_SEND_DT AS LAST_CHAT_SEND_DT
+		    FROM CHAT_USER CU1
+		    JOIN CHAT_USER CU2 ON CU1.ROOM_ID = CU2.ROOM_ID
+            JOIN CHAT C ON CU2.ROOM_ID = C.ROOM_ID
+		    WHERE CU2.EMP_ID = #{empId} AND NOT CU1.EMP_ID = #{empId}
+            AND C.CHAT_SEND_DT = (
+		    SELECT MAX(CHAT_SEND_DT)
+		    FROM CHAT
+		    WHERE ROOM_ID = CU2.ROOM_ID )
+		) B
+		ON A.EMP_ID = B.EMP_ID
+		
+	</select>
+	
+	<!-- 1:1채팅방이 이미 있는지 -->
+	<select id="checkRoom" resultType="string">
+	    SELECT DISTINCT CR.ROOM_ID
+	    FROM CHAT_ROOM CR
+	    JOIN CHAT_USER CU ON CR.ROOM_ID = CU.ROOM_ID
+	    WHERE CR.ROOM_TYPE = 'P'
+	    AND CU.EMP_ID = #{findId}
+	    AND CR.ROOM_ID IN (SELECT CU2.ROOM_ID
+	                        FROM CHAT_USER CU2
+	                        WHERE CU2.EMP_ID = #{userId})
+	</select>
+	
+    <!-- 새로운 1:1 채팅방 생성 -->
+    <insert id="createPrivateRoom" parameterType="ChatRoomVO">
+        <selectKey keyProperty="roomId" order="BEFORE" resultType="String">
+            SELECT 'R' || LPAD(NVL(TO_NUMBER(SUBSTR(MAX(ROOM_ID), 2)), 0) + 1, 5, '0') AS roomId FROM CHAT_ROOM
+        </selectKey>
+        
+        <!-- 실제 채팅방 생성 -->
+        INSERT INTO CHAT_ROOM (
+            ROOM_ID,
+            ROOM_NAME,
+            ROOM_TYPE,
+            ROOM_DEL_YN,
+            ROOM_CREATE_DT
+        ) VALUES (
+            #{roomId},
+            #{roomName},
+            'P',
+            NULL,
+            SYSTIMESTAMP
+        )
+    </insert>
+	
+	<!-- 채팅방 생성 시 ChatUser에 insert -->
+	<insert id="addChatUser" parameterType="ChatUserVO">
+		INSERT INTO CHAT_USER (
+			ROOM_ID
+			, EMP_ID
+		) VALUES (
+			#{roomId}
+			, #{empId}
+		)
+	</insert>
+	
+	<!-- 이전 대화내용 -->
+	<select id="getMessage" parameterType="string" resultType="ChatVO">
+        SELECT C.SENDER_ID, E.EMP_NAME, C.CHAT_CN, C.CHAT_SEND_DT
+        FROM CHAT C
+        JOIN EMP E ON (C.SENDER_ID = E.EMP_ID)
+        WHERE ROOM_ID = #{roomId}	
+        ORDER BY CHAT_SEND_DT ASC
+	</select>
+	
+	<!-- 새로운메세지추가 -->
+	<insert id="addMessage" parameterType="ChatVO">
+        <selectKey keyProperty="chatId" order="BEFORE" resultType="string">
+            SELECT LPAD(NVL(MAX(TO_NUMBER(CHAT_ID)), 0) + 1, 6, '0') AS chatId FROM CHAT
+        </selectKey>
+        
+		INSERT INTO CHAT (
+			CHAT_ID
+			, ROOM_ID
+			, SENDER_ID
+			, CHAT_CN
+			, CHAT_SEND_DT
+		) VALUES (
+			#{chatId}
+			, #{roomId}
+			, #{senderId}
+			, #{chatCn}
+			, SYSTIMESTAMP
+		)
+	</insert>
+	
+	<select id ="sameRoom" resultType="ChatUserVO">
+	SELECT E.EMP_NAME, CU.ROOM_ID
+	FROM CHAT_USER CU
+	JOIN EMP E ON (CU.EMP_ID = E.EMP_ID)
+	WHERE ROOM_ID = #{roomId} AND NOT EMP_NAME = #{empName}
+	</select>
+	
+</mapper>

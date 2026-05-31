@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.common.preparer.dao.ResourceDAO">
+
+	<select id="selectQuickList" resultType="MenuVO">
+		SELECT
+		     resc_menu,
+		    resc_url,
+		    resc_idx
+		FROM
+		    RESRCE
+		WHERE 
+		    resc_url like '/quick%' 
+		AND
+		    RESC_YN = 'Y'
+		AND 
+		    RESC_LEVEL = '2'
+		ORDER BY 
+			RESC_IDX
+	</select>
+	<select id="selectProjectList" resultType="MenuVO" parameterType="string">
+		SELECT
+		     resc_menu,
+		    resc_url,
+		    resc_idx
+		FROM
+		    RESRCE
+		WHERE 
+		    resc_url like '/project%' 
+		AND
+		    RESC_YN = 'Y'
+		AND 
+		    RESC_LEVEL = #{idx}
+		ORDER BY 
+			RESC_IDX
+	</select>
+	
+	<select id="selectMyPageList" resultType="MenuVO">
+		SELECT
+		    resc_menu,
+		    resc_url,
+		    resc_idx
+		FROM
+		    RESRCE
+		WHERE 
+		    resc_url like '/mypage%' 
+		AND
+		    RESC_YN = 'Y'
+		AND 
+		    RESC_LEVEL = #{idx}
+		ORDER BY 
+			RESC_IDX
+	</select>
+	
+	<select id="selectBaordList" resultType="MenuVO">
+	SELECT
+		     resc_menu,
+		    resc_url,
+		    resc_idx
+		FROM
+		    RESRCE
+		WHERE 
+		    resc_url like '/board%' 
+		AND
+		    RESC_YN = 'Y'
+		AND 
+		    RESC_LEVEL = '2'
+		ORDER BY 
+			RESC_IDX
+	</select>
+	
+	<select id="selectMainList" resultType="MenuVO">
+		SELECT
+		     resc_menu,
+		    resc_url,
+		    resc_idx
+		FROM
+		    RESRCE
+		WHERE 
+		    RESC_YN = 'Y'
+		AND 
+		    RESC_LEVEL = '1'
+		ORDER BY 
+			RESC_IDX
+	</select>
+</mapper>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.projectdetail.filesave.dao.FileSaveNoriceDAO">
+
+
+<sql id="searchFrag">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.searchWord)">
+		and
+			<choose>
+				<when test="paging.simpleCondition.searchType eq 'title'">
+					INSTR(fsn_title, #{paging.simpleCondition.searchWord}) > 0	
+				</when>
+				<when test="paging.simpleCondition.searchType eq 'name'">
+					INSTR(EMP.EMP_NAME, #{paging.simpleCondition.searchWord}) > 0
+				</when>
+				<otherwise>
+					INSTR(fsn_title, #{paging.simpleCondition.searchWord}) > 0
+					OR
+					INSTR(EMP.EMP_NAME, #{paging.simpleCondition.searchWord}) > 0
+				</otherwise>
+			</choose>
+		</if>
+</sql>
+<resultMap type="FileSaveNoticeVO" id="fileSaveMap" autoMapping="true">
+	<id column="FSN_ID" property="fsnId"/>
+	<result column="FSN_CN" property="fsnCn" jdbcType="CLOB"/>
+</resultMap>
+
+<select id="selectFileSaveNoiceList" resultMap="fileSaveMap" parameterType="PaginationInfo">
+SELECT B.* FROM
+(SELECT ROWNUM RNUM , A.* FROM
+(SELECT
+    fsn_id
+  , fs_id
+  ,emp.emp_Name
+  ,DEPT.DEPT_NAME
+  , pro_id
+  , fsn_reg_id
+  , fsn_title
+  , fsn_cn
+  , fsn_reg_dt
+  , fsn_mod_dt
+  , fsn_del_dt
+FROM
+    file_save_notice JOIN EMP ON(file_save_notice.fsn_reg_id = EMP.emp_id)
+    JOIN DEPT ON (EMP.DEPT_ID=DEPT.DEPT_ID)
+    WHERE PRO_ID = #{proId}
+     and fsn_del_dt is null
+     order by FSN_REG_DT desc
+    <include refid="searchFrag" />
+    )A)B
+<where>
+	<if test="paging.startRow gt 0 and paging.endRow gt 0">
+		<![CDATA[
+			RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+		]]>
+	</if>
+</where>
+</select>
+<select id="selectTotalRecord" parameterType="PaginationInfo">
+SELECT COUNT(*) FROM
+(SELECT
+    fsn_id
+  , fs_id
+  ,emp.emp_Name
+  ,DEPT.DEPT_NAME
+  , pro_id
+  , fsn_reg_id
+  , fsn_title
+  , fsn_cn
+  , fsn_reg_dt
+  , fsn_mod_dt
+  , fsn_del_dt
+FROM
+    file_save_notice JOIN EMP ON(file_save_notice.fsn_reg_id = EMP.emp_id)
+    JOIN DEPT ON (EMP.DEPT_ID=DEPT.DEPT_ID)
+    WHERE PRO_ID = #{proId}
+    and fsn_del_dt is null
+    order by FSN_REG_DT desc
+    <include refid="searchFrag" />
+    )
+</select>
+
+<select id="selectFileSaveNoriceOne" resultMap="fileSaveMap">
+SELECT
+    fsn_id
+  , fs_id
+  ,emp.emp_Name
+  ,DEPT.DEPT_NAME
+  ,POSITION.PS_NAME
+  , pro_id
+  , fsn_reg_id
+  , fsn_title
+  , fsn_cn
+  , fsn_reg_dt
+  , fsn_mod_dt
+  , fsn_del_dt
+FROM
+    file_save_notice JOIN EMP ON(file_save_notice.fsn_reg_id = EMP.emp_id)
+    JOIN DEPT ON (EMP.DEPT_ID=DEPT.DEPT_ID)
+    JOIN POSITION ON(EMP.PS_ID=POSITION.PS_ID)
+    WHERE fsn_id = #{fsnId}
+</select>
+<delete id="deleteFileSaveNotice">
+	UPDATE FILE_SAVE_NOTICE SET FSN_DEL_DT = SYSTIMESTAMP WHERE FSN_ID = #{fsnId}
+</delete>
+<update id="updateFileSaveNotice" parameterType="FileSaveNoticeVO">
+	UPDATE FILE_SAVE_NOTICE SET 
+	FSN_CN = #{fsnCn,jdbcType=CLOB}
+	,FSN_TITLE = #{fsnTitle}
+	,FSN_MOD_DT = SYSTIMESTAMP
+	WHERE
+	FSN_ID = #{fsnId}
+</update>
+<insert id="insertFileSaveNotice" parameterType="FileSaveNoticeVO">
+    <selectKey order="BEFORE" resultType="string" keyProperty="fsnId">
+        select 
+        'F'||LPAD(NVL(TO_NUMBER(SUBSTR(MAX(FSN_ID),5)),0)+1,5,'0') 
+        FROM FILE_SAVE_NOTICE
+    </selectKey>
+    INSERT INTO file_save_notice (
+        fsn_id
+        , fs_id
+        , pro_id
+        , fsn_reg_id
+        , fsn_title
+        , fsn_cn
+        , fsn_reg_dt
+        , fsn_mod_dt
+        , fsn_del_dt
+    ) VALUES (
+        #{fsnId}
+        , #{fsId}
+        , #{proId}
+        , #{fsnRegId}
+        , #{fsnTitle}
+        , #{fsnCn}
+        , SYSTIMESTAMP
+        , NULL
+        , NULL
+    )
+</insert>
+<select id="selectFileSave" resultType="FileSaveVO">
+select * from file_save where pro_id= #{proId}
+</select>
+
+
+<select id="selectFileSaveFileList" resultType="FileSaveFileVO">
+SELECT
+    fsf_id
+  , fsn_id
+  , pro_id
+  , fsf_reg_id
+  , fsf_gb_id
+  , fsf_attch_file
+  , fsf_org_nm
+  , fs_uuid_name
+  , fs_file_size
+FROM
+    file_save_file
+WHERE
+    FSN_ID = #{fsnId}
+
+
+</select>
+
+<insert id="insertFile" parameterType="FileSaveNoticeVO">
+<selectKey order="BEFORE" resultType="String" keyProperty="fsfId">
+			SELECT 
+				'F' || 
+				LPAD(
+				    NVL(
+				        TO_NUMBER(
+				            SUBSTR(
+				            MAX(fsf_id), 4)
+				            ), 0) + 1, 5, '0')
+							FROM file_save_file
+	</selectKey>
+INSERT INTO file_save_file (
+    fsf_id
+    , fsn_id
+    , pro_id
+    , fsf_reg_id
+    , fsf_gb_id
+    , fsf_attch_file
+    , fsf_org_nm
+    , fs_uuid_name
+    , fs_file_size
+) VALUES (
+    #{fsfId}
+  , #{fsnId}
+  , NULL
+  , NULL
+  , #{fsfGbId}
+  , NULL
+  , #{fsfOrgNm}
+  , #{fsUuidName}
+  , #{fsFileSize}
+  )
+</insert>
+
+<select id="selectFileSaveFile"  resultType="FileSaveFileVO">
+SELECT
+    fsf_id
+  , fsn_id
+  , pro_id
+  , fsf_reg_id
+  , fsf_gb_id
+  , fsf_attch_file
+  , fsf_org_nm
+  , fs_uuid_name
+  , fs_file_size
+FROM
+    file_save_file
+WHERE
+    fsf_id = #{fsnId}
+</select>
+
+<delete id="deleteFileSaveFile">
+DELETE FROM file_save_file
+	WHERE
+	        fsf_id = #{fsf_id}
+</delete>
+</mapper>

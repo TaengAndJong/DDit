@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.navi.quick.news.dao.NewsDAO">
+   <select id="selectNewsList" resultType="NewsVO">
+      SELECT
+          news_cg_id
+        , news_cg_name
+        , news_url
+        , news_img_url
+        , news_reg_dt
+        , news_repot
+      FROM
+          news_cg
+      ORDER BY NEWS_CG_ID
+   </select>
+   <select id="selectRecomNewsList" resultType="NewsVO">
+      select 
+         news_cg.news_cg_id
+        , news_cg.news_cg_name
+        , news_cg.news_url
+        , news_cg.news_img_url
+        , news_cg.news_reg_dt
+        , news_cg.news_repot
+      from 
+      news_cg join news_recom on (news_cg.news_cg_id = news_recom.news_cg_id)
+      where news_recom.age_cg_id= #{map.age} and news_recom.gen_cg_id = #{map.gen} and news_recom.dept_cg_id= #{map.dept}
+      order by news_recom.news_rank
+   </select>
+   
+   <insert id="insertNewsView">
+      INSERT INTO news_views (
+          emp_id
+          , news_cg
+      ) VALUES (
+          #{empId}
+        , #{newsId}
+      )
+   </insert>
+</mapper>

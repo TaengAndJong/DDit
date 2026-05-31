@@ -1,0 +1,6 @@
+@charset "UTF-8";
+.todolistModal  .modal-dialog{max-width: calc(100% - 50px);}
+/* 오늘의 일정 모달 */
+.todolistModal .modal-body{height:calc(100% - 140px)}
+.tdList-Modal_table{height: 70% ;overflow-y: scroll;margin-top: 20px;}
+#modalTable tbody tr:first-child{position:absolute; top:0;left:0;z-index:-1; margin:-1px; padding:0}

@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'CaviarDreams';
+    font-style: normal;
+    font-weight: 400;
+    src: local(※),
+         url('./CaviarDreams.woff') format('woff'),
+         url('./CaviarDreams.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'CaviarDreams';
+    font-weight: 500;
+    src: local(※)
+         url('./CaviarDreams.woff') format('woff'),
+         url('./CaviarDreams.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'CaviarDreams';
+    font-weight: 700;
+    src: local(※),
+         url('./GmarketSans500.woff') format('woff'),
+         url('./GmarketSans500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'CaviarDreams';
+    font-weight: bold;
+    src: local(※),
+         url('./CaviarDreams700.woff') format('woff'),
+         url('./CaviarDreams700.woff2') format('woff2');
+}
+.CaviarDreams { font-family: 'CaviarDreams';}

@@ -1,0 +1,12 @@
+@charset "UTF-8";
+table,.table{display:table;border-collapse:collapse;table-layout:fixed;width:100%;white-space:nowrap;border-top:3px solid #333333}
+table thead{border-bottom: 1px solid #333;}
+table tr{display:table-row}
+table th,table td{display:table-cell;vertical-align: middle !important;}
+.table th{padding: 1rem .5rem; }
+.text-link{display:block;width:100%;max-width:100%; align-items: center; font-weight: bold;}
+.text-link:hover,.text-link:focus{color:#0d6efd}
+.text-elipsis{width:100%;max-width:100%;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:break-all;word-wrap:break-word;height:20px}
+table .icon{margin: 0;}
+
+table tr a{width:100%}
