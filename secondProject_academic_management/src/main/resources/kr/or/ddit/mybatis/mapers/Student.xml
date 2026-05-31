@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.student.dao.StudentDAO">
+
+		<!-- 조회 할 데이터 : SELECT 는 RESULT TYPE이 필요함   -->
+	<select id="selectStudent" resultType="StudentVO" parameterType="string">
+	
+	SELECT 
+		    STUDENT.STD_NO,
+		    STUDENT.STD_NAME,
+		    STUDENT.STD_ID,
+		    STUDENT.STD_TELNO,
+		    STUDENT.STD_ADDRESS,
+		    STUDENT.PRO_NO,
+		    PROFESSOR.PRO_NAME
+		    
+	FROM 
+	    	STUDENT LEFT JOIN PROFESSOR ON STUDENT.PRO_NO = PROFESSOR.PRO_NO
+	   
+	WHERE 
+	   		STUDENT.STD_NO = #{stdNo}
+	</select>
+
+	<select id="selectSubjectList" resultType="SubjectVO">
+		SELECT B.*
+		FROM(
+		SELECT ROWNUM RNUM, A.*
+		FROM(
+		SELECT
+		S.SUB_CD
+		,S.SUB_GUBUN
+		,S.SUB_NAME
+		,S.SUB_CREDIT
+		FROM SUBJECT S
+		LEFT JOIN
+		CLASS C ON S.SUB_CD =
+		C.SUB_CD AND C.STD_NO = #{stNo1}
+		WHERE
+		C.SUB_CD IS NULL
+		) A
+
+		) B
+      <![CDATA[
+       WHERE RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+       ]]>
+
+
+	</select>
+	<select id="subjectTotalLecord"
+		parameterType="kr.or.ddit.common.paging.PaginationInfo">
+		select count(*)
+		from (
+		SELECT
+		S.SUB_CD, S.SUB_GUBUN,
+		S.SUB_NAME, S.SUB_CREDIT
+		FROM
+		SUBJECT S
+		LEFT JOIN
+		CLASS C ON S.SUB_CD =
+		C.SUB_CD AND C.STD_NO = #{stNo}
+		WHERE
+		C.SUB_CD IS NULL
+		)
+	</select>
+	<insert id="insertClass" parameterType="kr.or.ddit.vo.ClassVO">
+		INSERT INTO class (
+			std_no,
+			sub_cd,
+			cls_score
+		) VALUES (
+			#{stdNo},
+			#{subCd},
+			#{clsScore}
+		)
+	</insert>
+
+
+	<update id="updateStudent" parameterType="StudentVO">
+		UPDATE STUDENT
+		SET
+		STD_TELNO =
+		<choose>
+			<when test="stdTelno != null and stdTelno != ''">
+				#{stdTelno}
+			</when>
+			<otherwise>
+				STD_TELNO
+			</otherwise>
+		</choose>
+		,
+		STD_ADDRESS =
+		<choose>
+			<when test="stdAddress != null and stdAddress != ''">
+				#{stdAddress}
+			</when>
+			<otherwise>
+				STD_ADDRESS
+			</otherwise>
+		</choose>
+		WHERE
+		STD_NO = #{stdNo}
+	</update>
+
+
+</mapper>

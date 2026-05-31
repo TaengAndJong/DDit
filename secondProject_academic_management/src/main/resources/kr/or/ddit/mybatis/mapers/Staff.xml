@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.staff.dao.StaffDAO">
+
+   <!-- 학생 검색 조건을 담은 SQL 프래그먼트 정의 -->
+
+   <sql id="searchFrag">
+		<where>
+			<if
+				test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+				<choose>
+					<when test="simpleCondition.searchType eq 'stdNo'">
+						INSTR(STD_NO, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'stdName'">
+						INSTR(STD_NAME, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'proNo'">
+						INSTR(PRO_NO, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(STD_NO, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(STD_NAME, #{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(PRO_NO, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="searchFrag2">
+		<where>
+			<if
+				test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+				<choose>
+					<when test="simpleCondition.searchType eq 'proNo'">
+						INSTR(PRO_NO,#{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'proName'">
+						INSTR(PRO_NAME,#{simpleCondition.searchWord}) > 0
+					</when>
+					<when test="simpleCondition.searchType eq 'proMajor'">
+						INSTR(PRO_MAJOR,#{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(PRO_NO,#{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(PRO_NAME,#{simpleCondition.searchWord}) > 0
+						OR
+						INSTR(PRO_MAJOR,#{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+
+   <!-- 학생 총 레코드 수를 반환하는 쿼리 (selectTotalRecordStudent) -->
+   <select id="selectTotalRecordStudent" resultType="int"
+      parameterType="kr.or.ddit.common.paging.PaginationInfo">
+      SELECT COUNT(*)
+      FROM STUDENT
+      <include refid="searchFrag" />
+   </select>
+
+   <!-- 학생 리스트를 반환하는 쿼리(selectStudentList) -->
+   <select id="selectStudentList" resultType="StudentVO"
+      parameterType="kr.or.ddit.common.paging.PaginationInfo">
+      SELECT B.*
+      FROM(
+      SELECT ROWNUM RNUM, A.*
+      FROM(
+      SELECT STD_NO, STD_NAME,
+      STD_ID, STD_TELNO, STD_ADDRESS,PRO_NO
+      FROM STUDENT 
+      <include refid="searchFrag" />
+      ORDER BY STD_NO DESC
+      ) A
+      ORDER BY STD_NO
+      ) B
+      <![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+      ]]>
+   </select>
+
+   <!-- 학생 정보 조회 (selectStudent) -->
+   <select id="selectStudent" resultType="StudentVO"
+      parameterType="string">
+      SELECT
+      STD_NO, STD_NAME, STD_ID, STD_TELNO,
+      STD_ADDRESS,PRO_NO
+      FROM
+      STUDENT
+      WHERE
+      STD_NAME = #{stdName}
+   </select>
+
+   <!-- 학생 수강정보 조회 (selectStudent) -->
+
+   <!-- <select id="selectStudent" resultType="StudentVO" -->
+   <!-- parameterType="string"> -->
+   <!-- SELECT -->
+   <!-- S.STD_NO, -->
+   <!-- S.STD_NAME, -->
+   <!-- C.SUB_CD, -->
+   <!-- SB.SUB_NAME, -->
+   <!-- C.CLS_SCORE -->
+   <!-- FROM -->
+   <!-- STUDENT S -->
+   <!-- JOIN -->
+   <!-- CLASS C ON S.STD_NO = C.STD_NO -->
+   <!-- JOIN -->
+   <!-- SUBJECT SB ON C.SUB_CD = SB.SUB_CD -->
+   <!-- WHERE -->
+   <!-- S.STD_NAME = #{stdName} -->
+   <!-- </select> -->
+
+   <!-- ============================================================================== -->
+   <!-- 교수 검색 조건을 담은 SQL 프래그먼트 정의 -->
+
+
+   <!-- 교수 총 레코드 수를 반환하는 쿼리 (selectTotalRecordProfessor) -->
+   <select id="selectTotalRecordProfessor" resultType="int"
+      parameterType="kr.or.ddit.common.paging.PaginationInfo">
+      SELECT COUNT(*)
+      FROM PROFESSOR
+      <include refid="searchFrag2" />
+   </select>
+
+   <!-- 교수 리스트를 반환하는 쿼리(selectProfessorList) -->
+   <select id="selectProfessorList" resultType="ProfessorVO"
+      parameterType="kr.or.ddit.common.paging.PaginationInfo">
+      SELECT B.*
+      FROM(
+      SELECT ROWNUM RNUM, A.*
+      FROM(
+      SELECT PRO_NO, PRO_NAME,
+      PRO_MAJOR, PRO_TELNO
+      FROM PROFESSOR
+      <include refid="searchFrag2" />
+      ORDER BY PRO_NO DESC
+      ) A
+      ORDER BY
+      PRO_NO
+      ) B
+      <![CDATA[
+      WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+      ]]>
+   </select>
+
+   <!-- 교수 정보 조회 (selectProfessor) -->
+   <select id="selectProfessor" resultType="ProfessorVO"
+      parameterType="string">
+      SELECT PRO_NO, PRO_NAME,
+      PRO_MAJOR, PRO_TELNO
+      FROM
+      PROFESSOR
+      WHERE PRO_NO = #{proNo}
+   </select>
+   <!-- ============================================================================== -->
+
+   <!-- 학생 신규 등록 (insertStudent) -->
+
+   <!-- 교수 신규 등록 (insdertProfessor) -->
+   <!-- ============================================================================== -->
+
+      <!-- 학생 정보 수정 (updateStudent) -->
+   <update id="updateStudent" parameterType="StudentVO" >
+   UPDATE STUDENT    
+      SET                     
+         STD_TELNO = #{stdTelno,jdbcType=VARCHAR}   
+         , STD_ADDRESS = #{stdAddress,jdbcType=VARCHAR}        
+      WHERE STD_NO= #{stdNo,jdbcType=VARCHAR} 
+   </update>
+       
+
+   <!-- 교수 정보 수정 (updateProfessor) --> 
+   <update id="updateProfessor" parameterType="ProfessorVO" >
+   UPDATE PROFESSOR    
+      SET                     
+         PRO_TELNO = #{proTelno,jdbcType=VARCHAR}   
+      WHERE PRO_NO= #{proNo,jdbcType=VARCHAR} 
+   </update>
+   <!-- ============================================================================== -->
+
+   <!-- 학생 정보 삭제 (deleteStudent) -->
+
+   <!-- 교수 정보 삭제 (deleteProfessor) -->
+</mapper>

@@ -1,0 +1,28 @@
+# Eclipse / STS 관련 설정 폴더 및 파일 제외
+.settings/
+.project
+.classpath
+
+# 컴파일 및 빌드 관련 파일 제외
+target/
+bin/
+*.war
+*.jar
+*.class
+.metadata/
+.test/
+
+# 업로드 제외 파일확장자
+*.zip
+
+# IntelliJ 관련 설정 폴더 및 파일 제외 (혹시 쓰실 경우를 대비)
+.idea/
+*.iml
+
+# thirdProject
+thirdProject_naviRedmine/doc/00.프로그램가이드/
+thirdProject_naviRedmine/doc/프로젝트VScode일자별 백업/
+thirdProject_naviRedmine/doc/피피티_수정
+
+# Google API Secret Key
+client_secret.json

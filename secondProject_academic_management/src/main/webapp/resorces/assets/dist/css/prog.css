@@ -1,0 +1,68 @@
+@charset "UTF-8";
+
+/* icon */
+.icon{display:inline-block; line-height: 1; margin-right:5px}
+/* box  */
+[class*="-box"]{border-radius:10px}
+/* 공통 body */
+
+[class*=tit]{font-weight:700;font-size:25px;margin:10px; display:inline-block}
+h1{border-bottom: 1px dashed #ececec;position: relative}
+.version{position: absolute; right: 0; bottom:10px;}
+select,input[type="text"]{border:1px solid #8888}
+select+input[type="text"]{margin:0 2px 0 3px}
+input[readonly]{cursor:default; background-color:#ececec}
+input[readonly]:focus{ border-color:#8888;box-shadow:none;background-color: #ececec;}
+   
+.btn{vertical-align:top}
+.flex,.form-inline{display:inline-flex;align-items:center}
+li{min-height:25px}
+/*  login */
+.loginUser{position:relative; bottom:-5px}
+/* formBox */
+.formBox{padding:20px}
+.formBox .btn{margin:0 2px}
+
+
+/* [data-pg-role="searchUI"] */
+/* [data-pg-role="searchUI"],[data-pg-role="searchUI"] *{display:inline-block;} */
+[data-pg-role="searchUI"]{height:80px;}
+[data-pg-role="searchUI"] *{border-radius:4px;height:100%}
+
+/* content */
+.content{padding:20px;margin:20px 0;border:1px solid #ddd;border-radius:5px;position:relative}
+.content .inner{overflow-y:auto;overflow-x:hidden}
+.content .inner.code{margin:50px 0 0;border:1px solid #ddd;border-radius:4px}
+.content pre{height:200px;overflow:hidden;overflow-y:auto;margin:0}
+
+.tit.con-tit{font-size: 18px; position: absolute; left: 20px; top:20x}
+
+
+/* scroll */
+.content ::-webkit-scrollbar{width:13px}
+.content ::-webkit-scrollbar-track{background:rgba(24,119,242,0.1)}
+.content ::-webkit-scrollbar-thumb{background:rgba(14,108,246,0.5);border-radius:7px;display:block}
+.content ::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,0.5)}
+
+/* modal  */
+.modal{display:none}
+.modal.show{background:rgba(0,0,0,0.7)}
+/* copy btn */
+.btn.copy{position:absolute;right:15px;top:15px}
+
+/* login */
+.login{border-radius: 4px;padding: 30px;background-color: rgba(13,110,253,0.1);max-width: 500px;width: 100%;margin: 0 auto; text-align:center}
+.login.tit{display:block}
+
+/* info-box */
+.info-box{border:2px solid #fff;}
+
+
+/* customUl */
+.customUl{padding-left:15px}
+.customUl li{position:relative; padding-left:100px;margin:10px 0}
+.customUl li:after{content:''; display:block; clear:both}
+.customUl li > .tit:first-child{position:absolute; left:0px;text-align:justify;font-size: inherit;
+    margin: 0;}
+.customUl li > .tit:before{content:'';display:inline-block; width:4px;height:4px;background-color:#0d6efd; position:relative;top:-4px;margin-right:4px;border-radius:50%}
+

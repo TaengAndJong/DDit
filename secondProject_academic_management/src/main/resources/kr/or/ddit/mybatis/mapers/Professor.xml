@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.professor.dao.ProfessorDAO">
+	<select id="selectProfessor" resultType="ProfessorVO" parameterType="string">
+		SELECT *
+		FROM 
+		PROFESSOR
+		WHERE PRO_NO= #{proNo}
+	</select>
+	<select id="selectMyLectureStudentes" resultType="kr.or.ddit.vo.StudentVO">
+		select *
+		from student
+		where 
+		std_no in (
+			select STD_NO
+			from class
+			where sub_cd=(select 
+			    sub_cd
+			    from(
+			        select * 
+			        from lecture 
+			        where pro_no = #{proNo} 
+			    )A where sub_cd = #{subCd})
+			 )
+		order by std_no
+	</select>
+	
+	<select id="selectMySubject" resultType="SubjectVO" parameterType="string">
+	select *
+	from subject
+	where sub_cd in (
+	select sub_Cd
+	        from lecture 
+	        where pro_no = #{proNo}
+	)
+	</select>
+	
+	
+	<update id="insertScore">
+	UPDATE CLASS 
+	SET 
+	cls_score = #{scoreScore,jdbcType=INTEGER} 
+	WHERE 
+	std_no = #{scoreStdNo,jdbcType=CHAR} 
+	AND 
+	sub_cd = #{scoreSubCd,jdbcType=CHAR} 
+	</update>
+</mapper>

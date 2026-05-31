@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스타일가이드</title>
+<!-- 스타일 가이드 css 경로 -->
+<link rel="stylesheet"
+	href="http://localhost/team3/resorces/assets/dist/css/bootstrap.min.css">
+<link
+	href="https://fonts.googleapis.com/css2?family=PT+Sans&display=swap"
+	rel="stylesheet">
+	<link rel="stylesheet"
+	href="http://localhost/team3/resorces/assets/dist/css/layout.css">
+<link rel="stylesheet"
+	href="http://localhost/team3/resorces/assets/dist/css/prog.css">
+
+<script src="http://localhost/team3/resorces/js/jquery-3.7.1.min.js"></script>
+<script
+	src="http://localhost/team3/resorces/assets/dist/js/bootstrap.bundle.min.js"></script>
+<script
+	src="http://localhost/team3/resorces/assets/dist/js/clipboard.min.js"></script>
+<script
+	src="http://localhost/team3/resorces/assets/dist/js/programGuide.js"></script>
+
+
+</head>
+
+<body>
+	<div class="wrap">
+		<h1 class="text-center mb-sm-4 pb-sm-4">
+			공통 UI 스타일가이드<small class="text-muted fs-6  version">(231229-학사관리)</small>
+		</h1>
+
+		<!-- section01 -->
+		<div class="section" id="sc1">
+
+			<!-- ui login-->
+			<div class="ui">
+				<strong class="ui-tit">로그인 Form</strong>
+
+				<div class="content">
+					<div class="inner html">
+						<!-- ui : s -->
+						<!-- login UI -->
+						<div class="login border formBox">
+							<strong class="tit fs-5">학생용 로그인</strong>
+							<form id="submitForm" class="form-inline" method="post"
+								action="/team3/student/studentCheck.do"
+								enctype="application/x-www-form-urlencoded">
+								<div class="form-group">
+									<label for="loginID" class="sr-only">학생번호</label> <input
+										type="text" class="form-control" id="loginID" name="stdNo"
+										placeholder="학생번호입력">
+								</div>
+								<input type="submit" id="loginBtn" class="btn btn-primary ml-1"
+									value="로그인">
+							</form>
+
+							<div class="info-box p-3 mt-3">
+								<div class="info-inner flex">
+									<i class="icon"> 
+									<svg xmlns="http://www.w3.org/2000/svg"
+											width="16" height="16" fill="currentColor"
+											class="bi bi-info-circle-fill" viewBox="0 0 16 16">
+	                        				<path
+												d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"></path>
+	                    			</svg>
+									</i> <span>학번을 입력해주세요.</span>
+								</div>
+							</div>
+
+
+
+
+
+
+						</div>
+
+
+						<!-- message가 비어있거나 공백인 경우 아무것도 출력되지 않음 -->
+
+
+
+
+
+					</div>
+					<!-- login UI -->
+					<!-- ui : e -->
+				</div>
+			</div>
+
+			<!-- html -->
+			<div class="content">
+				<strong class="tit con-tit">HTML</strong>
+				<button class="btn btn-primary copy" id="clipBtn">복사</button>
+				<div class="inner code" id="code">
+					<pre>
+                                    <code data-clipboard-text="">
+            <!-- Code Start -->
+         
+            
+            <!-- Code END -->
+                                    </code>
+                                </pre>
+				</div>
+			</div>
+			<!-- html -->
+		</div>
+		<!-- ui 03 login-->
+
+
+		<!-- ui 01 search-->
+		<div class="ui">
+			<strong class="ui-tit">Search Bar</strong>
+			<div class="content">
+				<div class="inner html">
+					<!-- ui : s -->
+					<!-- form -->
+					<form id="submitForm" action="">
+						<input type="hidden" name="page" /> <input type="hidden"
+							name="searchType" value="${condition.searchType}" /> <input
+							type="hidden" name="searchWord" value="${condition.searchWord}" />
+					</form>
+					<!-- form -->
+					<!-- searchBar -->
+					<div data-pg-role="searchUI" data-pg-target="#submitForm"
+						class="formBox">
+						<!-- 입력용도 UI  -->
+						<select name="searchType"
+							data-pg-init-value="${condition.searchType}">
+							<option value>전체</option>
+							<!-- 프롬프트 옵션  value는 공백 -->
+							<option value="name">이름</option>
+							<option value="address">주소</option>
+						</select>
+						<div class="fieldset flex">
+							<input type="text" name="searchWord"
+								data-pg-init-value="${condition.searchWord}" title="검색어를 입력해주세요"
+								placeholder="검색어를 입력해주세요" />
+							<button type="button" class="btn btn-primary"
+								data-pg-role="searchBtn">검색</button>
+						</div>
+
+					</div>
+					<!-- searchBar -->
+					<!-- ui : e -->
+				</div>
+			</div>
+
+			<!-- html -->
+			<div class="content">
+				<strong class="tit con-tit">HTML</strong>
+				<button class="btn btn-primary copy" id="clipBtn">복사</button>
+				<div class="inner code" id="code">
+					<pre>
+                            <code data-clipboard-text="">
+    <!-- Code Start -->
+   &lt;form id="submitForm" action="" >
+    &lt;input type="hidden" name="page" />
+    &lt;input type="hidden" name="searchType" value="${condition.searchType}" />
+    &lt;input type="hidden" name="searchWord" value="${condition.searchWord}" />
+&lt;/form>
+&lt;!-- form -->
+&lt;!-- searchBar -->
+&lt;div data-pg-role="searchUI" data-pg-target="#submitForm" class="formBox">
+    &lt;!-- 입력용도 UI  -->
+    &lt;select name="searchType" data-pg-init-value="${condition.searchType}">
+        &lt;option value>전체&lt;/option> &lt;!-- 프롬프트 옵션  value는 공백 -->
+        &lt;option value="name">이름&lt;/option>
+        &lt;option value="address">주소&lt;/option>
+    &lt;/select>
+    &lt;div class="fieldset flex">
+        &lt;input type="text" name="searchWord" data-pg-init-value="${condition.searchWord}" title="검색어를 입력해주세요" placeholder="검색어를 입력해주세요" />
+        &lt;button type="button" class="btn btn-primary" data-pg-role="searchBtn">검색&lt;/button>
+    &lt;/div>
+
+&lt;/div>
+&lt;!-- searchBar -->
+    <!-- Code END -->
+                            </code>
+                        </pre>
+				</div>
+			</div>
+			<!-- html -->
+		</div>
+		<!-- ui 01 search-->
+
+		<!-- ui 02 table-->
+		<div class="ui">
+			<strong class="ui-tit">table - <small>조회</small></strong>
+			<div class="content">
+				<div class="inner html">
+					<!-- ui : s -->
+					<strong class="table-tit">조회</strong>
+					<table class="table table table-bordered">
+
+						<colgroup>
+							<col style="width: 5%;">
+							<col style="width: auto;">
+							<col style="width: 50%;">
+							<col style="width: 10%;">
+							<col style="width: 15%;">
+						</colgroup>
+						<thead>
+							<tr class="table-primary text-center">
+								<th>번호</th>
+								<th>과목코드</th>
+								<th>과목명</th>
+								<th>학생명</th>
+								<th>점수</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- 학점 셀렉트 박스 -->
+							<tr class="text-center">
+								<td>1</td>
+								<td>1</td>
+								<td class="text-start">논리와 연산</td>
+								<td>김은대</td>
+								<td><select name="score">
+										<option value="A">A</option>
+										<option value="B">B</option>
+										<option value="C">C</option>
+										<option value="D">D</option>
+										<option value="E">E</option>
+										<option value="F">F</option>
+								</select></td>
+							</tr>
+							<!-- 학점 셀렉트 박스 -->
+							<!-- 학점 입력박스 -->
+							<tr class="text-center">
+								<td>1</td>
+								<td>1</td>
+								<td class="text-start">논리와 연산</td>
+								<td>김은대</td>
+								<td><input type="text" name="score" value="학점 기입(A~F)">
+								</td>
+							</tr>
+							<!-- 학점 입력박스 -->
+						</tbody>
+					</table>
+					<!-- ui : e -->
+				</div>
+			</div>
+
+			<!-- html -->
+			<div class="content">
+				<strong class="tit con-tit">HTML</strong>
+				<button class="btn btn-primary copy" id="clipBtn">복사</button>
+				<div class="inner code" id="code">
+					<pre>
+                            <code data-clipboard-text="">
+    <!-- Code Start -->
+    &lt;strong class="table-tit">조회&lt;/strong>
+    &lt;table class="table table table-bordered">
+                            
+    &lt;colgroup>
+        &lt;col style="width: 5%;">
+        &lt;col style="width: auto;">
+        &lt;col style="width: 50%;">
+        &lt;col style="width: 10%;">
+        &lt;col style="width: 15%;">
+    &lt;/colgroup>
+    &lt;thead>
+        &lt;tr class="table-primary text-center">
+            &lt;th>번호&lt;/th>
+            &lt;th>과목코드&lt;/th>
+            &lt;th>과목명&lt;/th>
+            &lt;th>학생명&lt;/th>
+            &lt;th>점수&lt;/th>
+        &lt;/tr>
+    &lt;/thead>
+    &lt;tbody>
+        &lt;!-- 학점 셀렉트 박스 -->
+        &lt;tr class="text-center">
+            &lt;td>1&lt;/td>
+            &lt;td>1&lt;/td>
+            &lt;td class="text-start">논리와 연산&lt;/td>
+            &lt;td>김은대&lt;/td>
+            &lt;td>
+                &lt;select name="score">
+                    &lt;option value="A">A&lt;/option>
+                    &lt;option value="B">B&lt;/option>
+                    &lt;option value="C">C&lt;/option>
+                    &lt;option value="D">D&lt;/option>
+                    &lt;option value="E">E&lt;/option>
+                    &lt;option value="F">F&lt;/option>
+                &lt;/select> 
+            &lt;/td>
+        &lt;/tr>
+        &lt;!-- 학점 셀렉트 박스 -->
+        &lt;!-- 학점 입력박스 -->
+        &lt;tr class="text-center">
+            &lt;td>1&lt;/td>
+            &lt;td>1&lt;/td>
+            &lt;td class="text-start">논리와 연산&lt;/td>
+            &lt;td>김은대&lt;/td>
+            &lt;td>
+                &lt;input type="text" name="score" value="학점 기입(A~F)">
+            &lt;/td>
+        &lt;/tr>
+        &lt;!-- 학점 입력박스 -->
+    &lt;/tbody>
+&lt;/table>
+
+    <!-- Code END -->
+                            </code>
+                        </pre>
+				</div>
+			</div>
+			<!-- html -->
+		</div>
+		<!-- ui 02 table-->
+
+		<!-- ui 04 save form-->
+		<div class="ui">
+			<strong class="ui-tit">Form-<small>상세정보조회(공통)</small></strong>
+			<div class="content">
+				<div class="inner html">
+					<!-- infobox -->
+					<div class="infoBox infoBox p-2 mb-3">학생 누르면 모달뜸</div>
+					<!-- infobox -->
+					<!-- ui : s -->
+					<strong class="table-tit">조회</strong>
+					<table class="table table-bordered ">
+						<thead>
+							<tr class="table-primary">
+								<th>학번</th>
+								<th>학생명</th>
+								<th>과목수</th>
+								<th>전화번호</th>
+								<th>주소</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="student : ${students}">
+								<td>1</td>
+								<td><a href="javascript:;" data-bs-toggle="modal"
+									data-bs-target="#exampleModal" title="학생이름">학생A</a></td>
+								<td>20</td>
+								<td>01012345678</td>
+								<td>역삼1동</td>
+							</tr>
+						</tbody>
+					</table>
+					<!-- ui : e -->
+					<!-- modal -->
+					<div class="modal fade" id="exampleModal" tabindex="-1"
+						aria-labelledby="exampleModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h1 class="modal-title fs-5" id="exampleModalLabel">학생정보수정</h1>
+									<button type="button" class="btn-close" data-bs-dismiss="modal"
+										aria-label="Close"></button>
+								</div>
+								<form id="updateForm">
+									<div class="modal-body">
+										<!-- 1 -->
+										<label for="아이디" class="tit fs-6">라벨명기입</label> <input
+											type="text" name="propertyName" class="form-control"
+											placeholder="property name" id="아이디" readonly />
+										<!-- 1 -->
+										<!-- 1 -->
+										<label for="아이디" class="tit fs-6">라벨명기입</label> <input
+											type="text" id="아이디" class="form-control"
+											name="propertyValue" placeholder="property value" />
+										<!-- 1 -->
+										<label for="아이디" class="tit fs-6">라벨명기입</label> <input
+											type="text" id="아이디" class="form-control" name="description"
+											placeholder="description" />
+										<!-- 1 -->
+										<label for="아이디" class="tit fs-6">라벨명기입</label> <input
+											type="date" id="아이디" class="form-control" name="propDate"
+											placeholder="propDate" />
+										<!-- 1 -->
+										<label for="아이디" class="tit fs-6">라벨명기입</label> <input
+											type="datetime" id="아이디" class="form-control mb-3"
+											name="propTimestamp" placeholder="propTimestamp" />
+									</div>
+									<!-- 1 -->
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary"
+											data-bs-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-primary">UPDATE</button>
+									</div>
+									<!-- 1 -->
+								</form>
+
+							</div>
+						</div>
+					</div>
+					<!-- modal -->
+				</div>
+			</div>
+
+			<!-- html -->
+			<div class="content">
+				<strong class="tit con-tit">HTML</strong>
+				<button class="btn btn-primary copy" id="clipBtn">복사</button>
+				<div class="inner code" id="code">
+					<pre>
+                            <code data-clipboard-text="">
+    <!-- Code Start -->
+  &lt;!-- ui : s -->
+  &lt;strong class="table-tit">조회&lt;/strong>
+  &lt;table class="table table-bordered ">
+    &lt;thead>
+        &lt;tr class="table-primary">
+            &lt;th>학번&lt;/th>
+            &lt;th>학생명&lt;/th>
+            &lt;th>과목수&lt;/th>
+            &lt;th>전화번호&lt;/th>
+            &lt;th>주소&lt;/th>
+        &lt;/tr>
+    &lt;/thead>
+    &lt;tbody>
+        &lt;tr th:each="student : ${students}">
+            &lt;td>1&lt;/td>
+            &lt;td>
+                &lt;a href="javascript:;" data-bs-toggle="modal" data-bs-target="#exampleModal" title="학생이름">학생A&lt;/a>
+            &lt;/td>
+            &lt;td>20&lt;/td>
+            &lt;td>01012345678&lt;/td>
+            &lt;td>역삼1동&lt;/td>
+        &lt;/tr>
+    &lt;/tbody>
+&lt;/table>
+&lt;!-- ui : e -->
+&lt;!-- modal -->
+&lt;div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    &lt;div class="modal-dialog">
+        &lt;div class="modal-content">
+            &lt;div class="modal-header">
+                &lt;h1 class="modal-title fs-5" id="exampleModalLabel">학생정보수정&lt;/h1>
+                &lt;button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&lt;/button>
+            &lt;/div>
+            &lt;form id="updateForm">
+                &lt;div class="modal-body">
+                    &lt;!-- 1 -->
+                    &lt;label for="아이디" class="tit fs-6">라벨명기입&lt;/label>
+                    &lt;input type="text" name="propertyName" class="form-control" placeholder="property name" id="아이디"
+                        readonly />
+                    &lt;!-- 1 -->
+                    &lt;!-- 1 -->
+                    &lt;label for="아이디" class="tit fs-6">라벨명기입&lt;/label>
+                    &lt;input type="text" id="아이디" class="form-control" name="propertyValue"
+                        placeholder="property value" />
+                    &lt;!-- 1 -->
+                    &lt;label for="아이디" class="tit fs-6">라벨명기입&lt;/label>
+                    &lt;input type="text" id="아이디" class="form-control" name="description" placeholder="description" />
+                    &lt;!-- 1 -->
+                    &lt;label for="아이디" class="tit fs-6">라벨명기입&lt;/label>
+                    &lt;input type="date" id="아이디" class="form-control" name="propDate" placeholder="propDate" />
+                    &lt;!-- 1 -->
+                    &lt;label for="아이디" class="tit fs-6">라벨명기입&lt;/label>
+                    &lt;input type="datetime" id="아이디" class="form-control mb-3" name="propTimestamp"
+                        placeholder="propTimestamp" />
+                &lt;/div>
+                &lt;!-- 1 -->
+                &lt;div class="modal-footer">
+                    &lt;button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close&lt;/button>
+                    &lt;button type="submit" class="btn btn-primary">UPDATE&lt;/button>
+                &lt;/div>
+                &lt;!-- 1 -->
+            &lt;/form>
+
+        &lt;/div>
+    &lt;/div>
+&lt;/div>
+&lt;!-- modal -->
+    <!-- Code END -->
+                            </code>
+                        </pre>
+				</div>
+			</div>
+			<!-- html -->
+		</div>
+		<!-- ui 04 save form-->
+
+		<!-- ui 05 pagination-->
+		<div class="ui">
+			<strong class="ui-tit">pagination</strong>
+			<div class="content">
+				<div class="inner html">
+					<!-- ui : s -->
+
+					<!-- ui : e -->
+				</div>
+			</div>
+
+			<!-- html -->
+			<div class="content">
+				<strong class="tit con-tit">HTML</strong>
+				<button class="btn btn-primary copy" id="clipBtn">복사</button>
+				<div class="inner code" id="code">
+					<pre>
+                            <code data-clipboard-text="">
+    <!-- Code Start -->
+
+    
+    <!-- Code END -->
+                            </code>
+                        </pre>
+				</div>
+			</div>
+			<!-- html -->
+		</div>
+		<!-- ui 05 pagination-->
+
+
+
+		<!-- ui 03 smaple-->
+		<div class="ui">
+			<strong class="ui-tit">sample</strong>
+
+			<div class="content">
+				<div class="inner html">
+					<!-- ui : s -->
+					<!-- form -->
+
+					<!-- form -->
+					<!-- ui : e -->
+				</div>
+			</div>
+
+			<!-- html -->
+			<div class="content">
+				<strong class="tit con-tit">HTML</strong>
+				<button class="btn btn-primary copy" id="clipBtn">복사</button>
+				<div class="inner code" id="code">
+					<pre>
+                        <code data-clipboard-text="">
+<!-- Code Start -->
+
+
+<!-- Code END -->
+                        </code>
+                    </pre>
+				</div>
+			</div>
+			<!-- html -->
+		</div>
+		<!-- ui 03 smaple-->
+
+	</div>
+	<!-- section01-->
+
+
+
+	</div>
+</body>
+
+</html>
